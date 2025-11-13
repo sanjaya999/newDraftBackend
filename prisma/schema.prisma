@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//user model
+model User{
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+
+//one - to - many docs
+ownedDocuments Document[] @relation("Owner")
+
+//many to many docs this user has permission 
+permissions DocumentPermission[]
+
+@@map("users")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  title     String   @default("Untitled Document")
+  content   Json?    @default("{\"ops\":[]}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 1-to-many: The user who *owns* this document
+  owner     User     @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String
+
+  // many-to-many: The list of all users who can access this document
+  permissions DocumentPermission[]
+
+  @@map("documents")
+}
+
+// This is the "join table" for many-to-many permissions
+model DocumentPermission {
+  id           String       @id @default(cuid())
+  role         DocumentRole @default(VIEWER)
+  createdAt    DateTime     @default(now())
+
+  // Relation to the User
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+
+  // Relation to the Document
+  document     Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId   String
+
+  // A user can only have one permission entry per document
+  @@unique([userId, documentId])
+  @@map("document_permissions")
+}
+
+enum DocumentRole{
+  OWNER
+  EDITOR
+  VIEWER
+}

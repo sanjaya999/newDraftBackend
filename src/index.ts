@@ -1,0 +1,56 @@
+import express from "express";
+import pino from "pino";
+import cors from "cors";
+import { env } from "./infrastructure/envConfig.js"
+import helmet from "helmet";
+import { logger } from "./infrastructure/logger.js";
+import { globalErrorHandler } from "./middleware/errorHandler.js";
+import { prisma } from "./infrastructure/database.js";
+import { start } from "node:repl";
+import router from "./routes/auth.route.js";
+import authRouter from "./routes/auth.route.js";
+
+const app = express();
+app.use(helmet());
+const PORT = process.env.PORT || 4000;
+
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
+
+app.use(cors({
+  origin:(origin, callback)=>{
+    const allowedOrigins = JSON.parse(env.CORS_ORIGIN);
+    if(!origin || allowedOrigins.indexOf(origin) !== -1){
+      callback(null, true);
+    }else{
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+}));
+
+const startServer = async ()=>{
+  try{
+    await prisma.$connect();
+    logger.info("Connected to the database successfully.");
+
+    app.listen(PORT, ()=>{
+      logger.info(`Server is running on http://localhost:${PORT}`);
+    }); 
+  }catch(error){
+    logger.error("Failed to start the server: Database connection error");
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+startServer();
+
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
+
+app.use("/auth" , authRouter);
+
+logger.info(`Environment: ${env.NODE_ENV}`);
+
+app.use(globalErrorHandler)
