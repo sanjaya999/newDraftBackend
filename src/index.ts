@@ -4,11 +4,11 @@ import cors from "cors";
 import { env } from "./infrastructure/envConfig.js"
 import helmet from "helmet";
 import { logger } from "./infrastructure/logger.js";
-import { globalErrorHandler } from "./middleware/errorHandler.js";
 import { prisma } from "./infrastructure/database.js";
 import { start } from "node:repl";
 import router from "./routes/auth.route.js";
 import authRouter from "./routes/auth.route.js";
+import { globalErrorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
 app.use(helmet());
@@ -53,4 +53,4 @@ app.use("/auth" , authRouter);
 
 logger.info(`Environment: ${env.NODE_ENV}`);
 
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
