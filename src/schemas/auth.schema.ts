@@ -16,3 +16,13 @@ export const registerSchema = z.object({
     params: z.object({}).optional(),
 
 })
+
+export const loginSchema = z.object({
+    body: z.object({
+        email: z.string(
+             "Email is required."
+        ).email("Invalid email format."),
+        
+        password: z.string( "Password is required.").min(6, "Password must be at least 6 characters."),
+    }),
+})
