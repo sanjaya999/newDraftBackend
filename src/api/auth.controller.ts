@@ -21,3 +21,14 @@ export const registerController = asyncHandler(async(req : Request , res: Respon
    )
 
 })
+
+export const authCheck = asyncHandler(async(req : Request , res: Response )=>{
+
+   return sendResponse(res,
+      StatusCodes.OK,
+      {data: "Passed",
+         message: "auth Passed"   
+      }
+   )
+
+})
