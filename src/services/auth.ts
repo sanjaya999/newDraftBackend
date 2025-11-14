@@ -1,13 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { ApiError } from "../core/ApiError.js";
-import type { AuthResponseDTO } from "../models/auth.dto.js";
 import * as userRepository from "../repository/user.repository.js"
 import { generateAccessToken, generateRefreshToken, hashPassword } from "../utils/auth.utils.js";
 
 export async function registerUser(
     name: string,
     email: string,
-    password: string): Promise<AuthResponseDTO>
+    password: string)
 {
     const existingUser = await userRepository.findUserByEmail(email);
     if(existingUser){

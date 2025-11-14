@@ -17,7 +17,6 @@ const jsonArrayValidator = makeValidator<string>((value)=>{
 
 export const env = cleanEnv(process.env,{
     NODE_ENV: str({ devDefault: testOnly("test"), choices: ["development", "production", "test"] }),
-    HOST: host({ devDefault: testOnly("localhost") }),
     PORT: port({ devDefault: testOnly(3000) }),
     CORS_ORIGIN: jsonArrayValidator({
     devDefault: testOnly('["http://localhost:8888"]'),
