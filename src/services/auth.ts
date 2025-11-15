@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { ApiError } from "../core/ApiError.js";
 import * as userRepository from "../repository/user.repository.js"
-import { generateAccessToken, generateRefreshToken, hashPassword } from "../utils/auth.utils.js";
+import { comparePassword, generateAccessToken, generateRefreshToken, hashPassword } from "../utils/auth.utils.js";
 
 export async function registerUser(
     name: string,
@@ -25,4 +25,29 @@ export async function registerUser(
         accessToken, refreshToken , user:newUser
     }
   
+}
+
+export async function login(
+    email: string,
+    password: string
+){
+    const user = await userRepository.findUserByEmail(email);
+    if(!user){
+        throw new ApiError("No user found" , StatusCodes.UNAUTHORIZED)
+    }
+    const isPasswordValid = await comparePassword(password, user.password);
+
+    if(!isPasswordValid){
+        throw new ApiError("Invalid Password" , StatusCodes.UNAUTHORIZED)
+    }
+    
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+    const {password: _, ...userWithoutPasswor} = user;
+    
+    return{
+        accessToken, refreshToken , user: userWithoutPasswor
+    }
+
+
 }
