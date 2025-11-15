@@ -9,6 +9,7 @@ import { start } from "node:repl";
 import router from "./routes/auth.route.js";
 import authRouter from "./routes/auth.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
+import documentRouter from "./routes/docs.route.js";
 
 const app = express();
 app.use(helmet());
@@ -50,6 +51,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth" , authRouter);
+app.use("/docs" , documentRouter )
 
 logger.info(`Environment: ${env.NODE_ENV}`);
 

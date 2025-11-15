@@ -22,7 +22,5 @@ export const authenticate = asyncHandler(async(req:Request , res:Response , next
         console.log("decoded user" , user)
         req.user = user;
         next();
-
-  
 }
 )
