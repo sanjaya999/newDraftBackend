@@ -12,7 +12,7 @@ export const sendResponse= <T>(
     statusCodes: number,
     payload: ApiResponseData<T>
 ) =>{
-        res.status(statusCodes).json({
+       return res.status(statusCodes).json({
             success: true,
             message: payload.message,
             data: payload.data,
