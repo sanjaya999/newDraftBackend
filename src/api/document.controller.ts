@@ -1,0 +1,50 @@
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import type{ Request, Response } from "express";
+import { createDocument, upsertDocumentPermission } from "../repository/document.repository.js";
+import { sendResponse } from "../utils/response.js";
+import { StatusCodes } from "http-status-codes";
+import { addCollaborator, getDocumentById } from "../services/docs.js";
+
+export const createDocumentController = asyncHandler(async(req: Request, res:Response)=>{
+    const userId = req.user?.id;
+    const {title , content} = req.body;
+
+    const result = await createDocument(userId, {
+        title,
+        content
+    });
+    return sendResponse(res, StatusCodes.CREATED, {
+        data: result,
+        message:"Document Created"
+    })
+})
+
+export const getDocumentController = asyncHandler(async(req:Request , res:Response)=>{
+    const userId = req.user.id;
+    const  id = req.params.id!;
+
+    const result = await getDocumentById(id , userId);
+    return sendResponse(res, StatusCodes.OK,{
+        data: result.document,
+        message:"Document fetched success"
+    })
+})
+
+export const addCollaboratorController = asyncHandler(async(req: Request, res: Response)=>{
+    const userId = req.user.id;
+    const documentId = req.params.docID!;
+    const {email , role} = req.body;
+
+    const result = await addCollaborator(
+        documentId,
+        userId,
+        email,
+        role
+    )
+
+    return sendResponse(res, StatusCodes.OK,{
+        data:result,
+        message:"Collaborator added successfully"
+    })
+
+}) 
