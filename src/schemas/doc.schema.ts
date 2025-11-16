@@ -13,7 +13,7 @@ export const updateDocumentSchema = z.object({
     content: z.any().optional(),
   }),
   params: z.object({
-    id: z.string(),
+    docID: z.string(),
   }),
 });
 

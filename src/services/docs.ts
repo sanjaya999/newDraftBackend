@@ -1,5 +1,5 @@
 import type { CreateDocumentInput, UpdateDocumentInput } from "../types/documents.js";
-import { createDocument, findDocumentById, findDocumentWithContent, getDocumentCollaborators, updateDocument, upsertDocumentPermission } from "../repository/document.repository.js";
+import { createDocument, findDocumentById, findDocumentWithContent, getDocumentCollaborators, upsertDocumentPermission, updateDocument } from "../repository/document.repository.js";
 import { ApiError } from "../core/ApiError.js";
 import { StatusCodes } from "http-status-codes";
 import type { Document, DocumentRole } from "@prisma/client";
@@ -84,5 +84,22 @@ export async function addCollaborator(
     }
   }
 
+
+}
+
+export async function updateDocumentService(
+  input: UpdateDocumentInput,
+  docsId : string
+){
+  const document = await findDocumentById(docsId);
+  if(!document){
+    throw new ApiError("No document found" , StatusCodes.NOT_FOUND);
+  }
+
+  const updatedDocument = await updateDocument(docsId, input, false);
+    return {
+    document: updatedDocument,
+    message: "Document updated successfully",
+  };
 
 }
