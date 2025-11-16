@@ -3,7 +3,7 @@ import type{ Request, Response } from "express";
 import { createDocument, upsertDocumentPermission } from "../repository/document.repository.js";
 import { sendResponse } from "../utils/response.js";
 import { StatusCodes } from "http-status-codes";
-import { addCollaborator, getDocumentById } from "../services/docs.js";
+import { addCollaborator, getDocumentById, updateDocumentService } from "../services/docs.js";
 
 export const createDocumentController = asyncHandler(async(req: Request, res:Response)=>{
     const userId = req.user?.id;
@@ -48,3 +48,21 @@ export const addCollaboratorController = asyncHandler(async(req: Request, res: R
     })
 
 }) 
+
+export const updateDocumentController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+    const documentId  = req.params.docID!;
+    const { title, content } = req.body;
+
+    const result = await updateDocumentService({
+      title,
+      content,
+    }, documentId);
+
+    return sendResponse(res, StatusCodes.OK, {
+      data: result.document,
+      message:result.message,
+    });
+  }
+);

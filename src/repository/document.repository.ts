@@ -34,7 +34,7 @@ export async function createDocument(
   return prisma.document.create({
     data: {
       title: createDocumentInput.title ?? 'Untitled Document',
-      content: createDocumentInput.content ?? { ops: [] },
+      content: createDocumentInput.content ?? null,
       ownerId,
     },
     select: documentSelectPublic,
