@@ -1,17 +1,19 @@
 import express from "express";
-import pino from "pino";
 import cors from "cors";
 import { env } from "./infrastructure/envConfig.js"
 import helmet from "helmet";
 import { logger } from "./infrastructure/logger.js";
 import { prisma } from "./infrastructure/database.js";
-import { start } from "node:repl";
 import router from "./routes/auth.route.js";
 import authRouter from "./routes/auth.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
 import documentRouter from "./routes/docs.route.js";
+import { initCollabServer } from "./sockets/socket.server.js";
+import { createServer } from "http";
+
 
 const app = express();
+const httpServer = createServer(app);
 app.use(helmet());
 const PORT = process.env.PORT || 4000;
 
@@ -35,8 +37,12 @@ const startServer = async ()=>{
     await prisma.$connect();
     logger.info("Connected to the database successfully.");
 
-    app.listen(PORT, ()=>{
+    const io = initCollabServer(httpServer);
+    logger.info("socket.io server initilized");
+
+    httpServer.listen(PORT, ()=>{
       logger.info(`Server is running on http://localhost:${PORT}`);
+      logger.info(`socket ready`);
     }); 
   }catch(error){
     logger.error("Failed to start the server: Database connection error");
@@ -45,6 +51,7 @@ const startServer = async ()=>{
   }
 }
 startServer();
+
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
@@ -56,3 +63,5 @@ app.use("/docs" , documentRouter )
 logger.info(`Environment: ${env.NODE_ENV}`);
 
 app.use(globalErrorHandler);
+
+export{httpServer , app};

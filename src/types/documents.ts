@@ -1,5 +1,11 @@
 import { DocumentRole } from '@prisma/client';
+import * as Y from 'yjs'
 
+export interface DocumentData{
+  ydoc: Y.Doc;
+  connections: Set<string>;
+  lastSaved : string
+}
 export interface DocumentMetaData {
     id: string;
     title: string;
