@@ -11,7 +11,7 @@ export const createDocumentController = asyncHandler(async(req: Request, res:Res
 
     const result = await createDocument(userId, {
         title,
-        content
+        // content
     });
     return sendResponse(res, StatusCodes.CREATED, {
         data: result,
@@ -57,7 +57,7 @@ export const updateDocumentController = asyncHandler(
 
     const result = await updateDocumentService({
       title,
-      content,
+      // content,
     }, documentId);
 
     return sendResponse(res, StatusCodes.OK, {

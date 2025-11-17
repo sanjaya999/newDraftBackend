@@ -10,6 +10,7 @@ import { globalErrorHandler } from "./middleware/error.middleware.js";
 import documentRouter from "./routes/docs.route.js";
 import { initCollabServer } from "./sockets/socket.server.js";
 import { createServer } from "http";
+import { startPersistence } from "./utils/document.manager.js";
 
 
 const app = express();
@@ -64,4 +65,5 @@ logger.info(`Environment: ${env.NODE_ENV}`);
 
 app.use(globalErrorHandler);
 
+startPersistence();
 export{httpServer , app};

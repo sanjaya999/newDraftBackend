@@ -34,7 +34,7 @@ export async function createDocument(
   return prisma.document.create({
     data: {
       title: createDocumentInput.title ?? 'Untitled Document',
-      content: createDocumentInput.content ?? null,
+      // content: createDocumentInput.content ?? null,
       ownerId,
     },
     select: documentSelectPublic,
@@ -65,7 +65,7 @@ export async function updateDocument(
     where: { id },
     data: {
       ...(input.title !== undefined && { title: input.title }),
-      ...(input.content !== undefined && { content: input.content }),
+      // ...(input.content !== undefined && { content: input.content }),
     },
     select: selectPublic ? documentSelectPublic : documentSelectWithContent,
   });

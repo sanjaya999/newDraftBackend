@@ -17,12 +17,12 @@ export interface DocumentMetaData {
 
 export interface CreateDocumentInput {
   title?: string;
-  content?: any;
+  // content?: any;
 }
 
 export interface UpdateDocumentInput {
   title?: string;
-  content?: any;
+  // content?: any;
 }
 
 export interface ShareDocumentInput {
