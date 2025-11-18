@@ -52,6 +52,8 @@ jobs:
           rm -f package-lock.json
           rm -rf node_modules
           npm install
+      - name: Generate Prisma Client
+        run: npx prisma generate
 
       - name: Run Build
         run: npm run build
