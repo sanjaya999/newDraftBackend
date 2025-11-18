@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi } from "vitest"
 
 
 vi.mock("@/middleware/authenticate" , ()=>({
@@ -9,4 +9,4 @@ vi.mock("@/middleware/authenticate" , ()=>({
         };
         next();
     })
-}))
+}));
