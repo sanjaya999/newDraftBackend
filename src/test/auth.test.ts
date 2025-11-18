@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { authenticate } from "../src/middleware/authenticate.js";
+import { authenticate } from "../middleware/authenticate.js";
 
 describe("authenticate middleware", () => {
   it("should mock user object", () => {
