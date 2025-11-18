@@ -6,7 +6,7 @@ import { loadYjsDocument } from "./yjs.persistence.js";
 import { success } from "zod";
 import { prisma } from "../infrastructure/database.js";
 
-const documents = new Map<string, DocumentData>();
+export const documents = new Map<string, DocumentData>();
 const SAVE_INTERVAL = 30000
 
 export async function joinDocument(
