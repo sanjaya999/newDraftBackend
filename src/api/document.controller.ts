@@ -3,19 +3,27 @@ import type{ Request, Response } from "express";
 import { createDocument, upsertDocumentPermission } from "../repository/document.repository.js";
 import { sendResponse } from "../utils/response.js";
 import { StatusCodes } from "http-status-codes";
-import { addCollaborator, getDocumentById, updateDocumentService } from "../services/docs.js";
+import { addCollaborator, getDocumentById, updateDocumentService, getAllDocument } from "../services/docs.js";
 
 export const createDocumentController = asyncHandler(async(req: Request, res:Response)=>{
     const userId = req.user?.id;
-    const {title , content} = req.body;
+    const { title } = req.body;
 
     const result = await createDocument(userId, {
         title,
-        // content
     });
     return sendResponse(res, StatusCodes.CREATED, {
         data: result,
         message:"Document Created"
+    })
+})
+export const getAllDocumentController = asyncHandler(async(req:Request , res:Response)=>{
+    const userId = req.user.id;
+
+    const result = await getAllDocument(userId);
+    return sendResponse(res, StatusCodes.OK,{
+        data: result.document,
+        message:"Document fetched success"
     })
 })
 
