@@ -1,5 +1,5 @@
 import type { CreateDocumentInput, UpdateDocumentInput } from "../types/documents.js";
-import { createDocument, findDocumentById, findDocumentWithContent, getDocumentCollaborators, upsertDocumentPermission, updateDocument } from "../repository/document.repository.js";
+import { createDocument, findDocumentById, getDocumentCollaborators, upsertDocumentPermission, updateDocument, findDocument } from "../repository/document.repository.js";
 import { ApiError } from "../core/ApiError.js";
 import { StatusCodes } from "http-status-codes";
 import type { Document, DocumentRole } from "@prisma/client";
@@ -18,6 +18,13 @@ export async function createNewDocument(
     document,
     message: "Document created successfully",
   };
+}
+export async function getAllDocument(userId: string){
+  const document = await findDocument(userId);
+  if(!document){
+    throw new ApiError("Document not found", StatusCodes.NOT_FOUND);
+  }
+  return {document};
 }
 
 export async function getDocumentById(id: string, userId: string) {
@@ -96,7 +103,7 @@ export async function updateDocumentService(
     throw new ApiError("No document found" , StatusCodes.NOT_FOUND);
   }
 
-  const updatedDocument = await updateDocument(docsId, input, false);
+  const updatedDocument = await updateDocument(docsId, input);
     return {
     document: updatedDocument,
     message: "Document updated successfully",

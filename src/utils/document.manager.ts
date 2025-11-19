@@ -1,5 +1,4 @@
 import { logger } from "../infrastructure/logger.js";
-import { findDocumentWithContent } from "../repository/document.repository.js";
 import type { DocumentData } from "../types/documents.js";
 import * as Y from "yjs"
 import { loadYjsDocument } from "./yjs.persistence.js";
