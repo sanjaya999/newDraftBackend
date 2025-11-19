@@ -7,6 +7,7 @@ import { logger } from "../infrastructure/logger.js";
 import { joinDocument, persistDocument } from "../utils/document.manager.js";
 import { success } from "zod";
 import { registerDocumentHandlers } from "../services/socket.doc.js";
+import { socketAuthorize } from "../middleware/authorization.js";
 
 const documents= new Map<string, DocumentData>();
 
@@ -30,6 +31,8 @@ export function initCollabServer(httpServer:any) : Server {
 
 function setupSocketHandlers(io: Server){
     io.use(socketAuth);
+    // io.use(socketAuthorize("read"))
+    
 
     io.on('connection' , (socket: Socket) =>{
     //     const userId = socket.data.user.id;
