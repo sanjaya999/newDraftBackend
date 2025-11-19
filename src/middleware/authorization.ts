@@ -18,7 +18,7 @@ export const authorize = (requiredPermission: PermissionAction) => {
             req.documentId = documentId;
             next();
         } catch (error) {
-            next(new ApiError("Authentication error invalid token", StatusCodes.FORBIDDEN));
+            throw new ApiError("Access Denied ", StatusCodes.FORBIDDEN);
         }
     };
 };

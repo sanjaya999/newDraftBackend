@@ -1,3 +1,5 @@
+import { StatusCodes } from "http-status-codes";
+import { ApiError } from "../core/ApiError.js";
 import { prisma } from "../infrastructure/database.js";
 import { PERMISSIONS, type PermissionAction } from "../types/permissions.js";
 
@@ -11,7 +13,7 @@ export const checkDocumentPermission = async (
         select: { ownerId: true }
     });
 
-    if (!document) throw new Error("Document not found");
+    if (!document) throw new ApiError("Document not found" , StatusCodes.NOT_FOUND);
     if (document.ownerId === userId) return "OWNER";
 
     const permission = await prisma.documentPermission.findUnique({
@@ -21,11 +23,11 @@ export const checkDocumentPermission = async (
         select: { role: true }
     });
 
-    if (!permission) throw new Error("Access Denied");
+    if (!permission) throw new ApiError("Access Denied" , StatusCodes.FORBIDDEN);
 
     const allowedRoles = PERMISSIONS[requiredPermission];
     if (!allowedRoles || !allowedRoles.includes(permission.role)) {
-        throw new Error("Insufficient permissions");
+        throw new ApiError("Insufficient permissions" , StatusCodes.FORBIDDEN);
     }
 
     return permission.role;
