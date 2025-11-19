@@ -14,18 +14,6 @@ export type PublicDocument = Prisma.DocumentGetPayload<{
     select: typeof documentSelectPublic;
 }>
 
-export const documentSelectWithContent = {
-  id: true,
-  title: true,
-  content: true,
-  ownerId: true,
-  createdAt: true,
-  updatedAt: true,
-} satisfies Prisma.DocumentSelect;
-
-export type DocumentWithContent = Prisma.DocumentGetPayload<{
-  select: typeof documentSelectWithContent;
-}>;
 
 export async function createDocument(
   ownerId: string,
@@ -34,7 +22,6 @@ export async function createDocument(
   return prisma.document.create({
     data: {
       title: createDocumentInput.title ?? 'Untitled Document',
-      // content: createDocumentInput.content ?? null,
       ownerId,
     },
     select: documentSelectPublic,
@@ -48,10 +35,10 @@ export async function findDocumentById(id: string): Promise<PublicDocument | nul
   });
 }
 
-export async function findDocumentWithContent(id: string): Promise<DocumentWithContent | null> {
-  return prisma.document.findUnique({
-    where: { id },
-    select: documentSelectWithContent,
+export async function findDocument(id: string): Promise<PublicDocument[] | null> {
+  return prisma.document.findMany({
+    where: { ownerId: id },
+    select: documentSelectPublic,
   });
 }
 
@@ -59,7 +46,6 @@ export async function findDocumentWithContent(id: string): Promise<DocumentWithC
 export async function updateDocument(
   id: string,
   input: UpdateDocumentInput,
-  selectPublic = true
 ) {
   return prisma.document.update({
     where: { id },
@@ -67,7 +53,7 @@ export async function updateDocument(
       ...(input.title !== undefined && { title: input.title }),
       // ...(input.content !== undefined && { content: input.content }),
     },
-    select: selectPublic ? documentSelectPublic : documentSelectWithContent,
+    select: documentSelectPublic ,
   });
 }
 
