@@ -118,8 +118,11 @@ export async function onCustomDocumentSync(socket: Socket, docID: string, update
   }
 }
 
-function onCustomDocumentAwareness(socket: Socket, docID: string, update: Uint8Array) {
-  socket.to(docID).emit("document:awareness", update);
+function onCustomDocumentAwareness(socket: Socket, docID: string, update: any) {
+  socket.to(docID).emit("cdocument:awareness", {
+    userId: socket.id,
+    ...update
+  });
 }
 
 
@@ -193,15 +196,6 @@ export function registerDocumentHandlers(socket: Socket) {
     }
   });
 
-  socket.on("cdocument:awareness", async (docID, update) => {
-    try {
-      await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
-      onCustomDocumentAwareness(socket, docID, update);
-    } catch (error: any) {
-      logger.warn(`User ${userId} denied awareness access to custom doc ${docID}: ${error.message}`);
-    }
-  });
-
   socket.on("cdocument:update", async ({ docID, update }) => {
     try {
       await checkDocumentPermission(userId, docID, "UPDATE_DOCUMENT");
@@ -210,6 +204,18 @@ export function registerDocumentHandlers(socket: Socket) {
       logger.warn(`User ${userId} denied update to custom doc ${docID}`);
     }
   });
+
+socket.on("cdocument:awareness", async ({ docID, Selection }) => {
+  try {
+  
+    await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
+    
+    if (Selection) {
+        onCustomDocumentAwareness(socket, docID, Selection);
+    }
+  } catch (error: any) {
+  }
+});
 
   socket.on("disconnect", () => {
     onDisconnect(socket);
