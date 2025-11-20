@@ -33,11 +33,12 @@ permissions DocumentPermission[]
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  title     String   @default("Untitled Document")
+  id        String       @id @default(cuid())
+  title     String       @default("Untitled Document")
   content   Bytes?   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  docType   DocumentType @default(YJS)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   // 1-to-many: The user who *owns* this document
   owner     User     @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -66,6 +67,11 @@ model DocumentPermission {
   // A user can only have one permission entry per document
   @@unique([userId, documentId])
   @@map("document_permissions")
+}
+
+enum DocumentType {
+  YJS
+  CCRDT
 }
 
 enum DocumentRole{

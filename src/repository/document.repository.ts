@@ -6,6 +6,7 @@ export const documentSelectPublic = {
     id: true,
     title: true,
     ownerId: true,
+    docType: true,
     createdAt: true,
     updatedAt: true,
 }satisfies Prisma.DocumentSelect;
@@ -22,6 +23,7 @@ export async function createDocument(
   return prisma.document.create({
     data: {
       title: createDocumentInput.title ?? 'Untitled Document',
+      ...(createDocumentInput.docType && { docType: createDocumentInput.docType }),
       ownerId,
     },
     select: documentSelectPublic,

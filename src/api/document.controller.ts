@@ -7,10 +7,11 @@ import { addCollaborator, getDocumentById, updateDocumentService, getAllDocument
 
 export const createDocumentController = asyncHandler(async(req: Request, res:Response)=>{
     const userId = req.user?.id;
-    const { title } = req.body;
+    const { title, docType } = req.body;
 
     const result = await createDocument(userId, {
         title,
+        docType,
     });
     return sendResponse(res, StatusCodes.CREATED, {
         data: result,

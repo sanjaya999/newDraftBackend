@@ -1,15 +1,22 @@
 import { DocumentRole } from '@prisma/client';
 import * as Y from 'yjs'
 
+export enum DocumentType {
+  YJS = 'YJS',
+  CCRDT = 'CCRDT'
+}
+
 export interface DocumentData{
   ydoc: Y.Doc;
   connections: Set<string>;
   lastSaved : string
 }
+
 export interface DocumentMetaData {
     id: string;
     title: string;
     ownerId: string;
+    docType: DocumentType;
     createdAt: string;
     updatedAt: string;
 }
@@ -17,6 +24,7 @@ export interface DocumentMetaData {
 
 export interface CreateDocumentInput {
   title?: string;
+  docType?: DocumentType;
   // content?: any;
 }
 
