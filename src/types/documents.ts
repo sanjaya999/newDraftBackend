@@ -1,5 +1,6 @@
 import { DocumentRole } from '@prisma/client';
 import * as Y from 'yjs'
+import type { SharedCRDT } from '../shared/crdt.js';
 
 export enum DocumentType {
   YJS = 'YJS',
@@ -61,4 +62,10 @@ export interface ConnectedClient {
   userName: string | null;
   role: DocumentRole;
   lastSeen: Date;
+}
+
+export interface CustomDocumentData{
+ crdt: SharedCRDT;
+ connections: Set<string>;
+ lastSaved : number; 
 }

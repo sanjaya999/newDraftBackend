@@ -4,6 +4,10 @@ import { logger } from "../infrastructure/logger.js";
 import * as Y from "yjs";
 import { checkDocumentPermission } from "./permissionService.js";
 import { PERMISSIONS } from "../types/permissions.js";
+import { SharedCRDT } from "../shared/crdt.js";
+import type { CustomDocumentData } from "../types/documents.js";
+
+const customDocuments = new Map<string, CustomDocumentData>();
 
 async function onDocumentJoin(
   socket: Socket,
@@ -60,6 +64,13 @@ function onDisconnect(socket: Socket) {
         documents.delete(docID);
       }
     }
+    const cDoc = customDocuments.get(docID);
+    if (cDoc) {
+      cDoc.connections.delete(socket.id);
+      if (cDoc.connections.size === 0) {
+         customDocuments.delete(docID); 
+      }
+    }
   });
 }
 
@@ -67,25 +78,81 @@ function onDocumentAwareness(socket: Socket, docID: string, update: Uint8Array) 
   socket.to(docID).emit("document:awareness", update);
 }
 
+
+async function onCustomDocumentJoin(
+  socket: Socket,
+  userId: string,
+  docID: string,
+  callback: (resp: any) => void
+) {
+  try {
+    socket.join(docID);
+    
+    if (!customDocuments.has(docID)) {
+       customDocuments.set(docID, { 
+         crdt: new SharedCRDT(), 
+         connections: new Set(), 
+         lastSaved: Date.now() 
+       });
+    }
+    
+    const docData = customDocuments.get(docID)!;
+    docData.connections.add(socket.id);
+
+    callback({ success: true, state: docData.crdt.getAll() });
+    
+    logger.info(`User ${userId} joined Custom CRDT ${docID}`);
+  } catch (err: any) {
+  }
+}
+
+export async function onCustomDocumentSync(socket: Socket, docID: string, update: Uint8Array) {
+  try {
+    const docData = documents.get(docID);
+    if (docData) {
+      Y.applyUpdate(docData.ydoc, update, socket.id);
+      socket.to(docID).emit("document:sync", update);
+    }
+  } catch (err: any) {
+    logger.error(`Error in document:sync:`, err);
+  }
+}
+
+function onCustomDocumentAwareness(socket: Socket, docID: string, update: Uint8Array) {
+  socket.to(docID).emit("document:awareness", update);
+}
+
+
+function onCustomDocumentUpdate(socket: Socket, docID: string, update: any) {
+  const docInstance = customDocuments.get(docID)
+  if (docInstance) {
+    const changed = docInstance.crdt.merge(update);
+    
+    if (changed) {
+      socket.to(docID).emit("cdocument:update", update);
+    }
+  }
+}
+
 export function registerDocumentHandlers(socket: Socket) {
   const userId = socket.data.user.id || "anonymous";
   logger.info(`Registering handlers for socket ${socket.id} (User ${userId})`);
 
 
-  socket.on("document:join", async (docID, callback) => {
+  socket.on("cdocument:join", async (docID, callback) => {
     try {
       await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
-      onDocumentJoin(socket, userId, docID, callback);
+      onCustomDocumentJoin(socket, userId, docID, callback);
     } catch (error: any) {
       logger.warn(`User ${userId} denied access to document ${docID}: ${error.message}`);
       callback({ success: false, error: error.message || "Access denied" });
     }
   });
 
-  socket.on("document:sync", async (docID, update) => {
+  socket.on("cdocument:sync", async (docID, update) => {
     try {
       await checkDocumentPermission(userId, docID, "UPDATE_DOCUMENT");
-      onDocumentSync(socket, docID, update);
+      onCustomDocumentSync(socket, docID, update);
     } catch (error: any) {
       logger.warn(`User ${userId} denied sync access to document ${docID}: ${error.message}`);
       socket.emit("document:error", {
@@ -95,10 +162,10 @@ export function registerDocumentHandlers(socket: Socket) {
     }
   });
 
-  socket.on("document:awareness", async (docID, update) => {
+  socket.on("cdocument:awareness", async (docID, update) => {
     try {
       await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
-      onDocumentAwareness(socket, docID, update);
+      onCustomDocumentAwareness(socket, docID, update);
     } catch (error: any) {
       logger.warn(`User ${userId} denied awareness access to document ${docID}: ${error.message}`);
     }
@@ -106,5 +173,25 @@ export function registerDocumentHandlers(socket: Socket) {
 
   socket.on("disconnect", () => {
     onDisconnect(socket);
+  });
+
+  socket.on("cdocument:join", async (docID, callback) => {
+    try {
+      await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
+      onCustomDocumentAwareness(socket, docID, callback);
+      logger.info(`User ${userId} joined Custom CRDT ${docID}`);
+    } catch (error: any) {
+      logger.warn(`User ${userId} denied access to custom doc ${docID}`);
+      callback({ success: false, error: "Access denied" });
+    }
+  });
+
+  socket.on("cdocument:update", async ({ docID, update }) => {
+    try {
+      await checkDocumentPermission(userId, docID, "UPDATE_DOCUMENT");
+      onCustomDocumentUpdate(socket, docID, update);
+    } catch (error: any) {
+      logger.warn(`User ${userId} denied update to custom doc ${docID}`);
+    }
   });
 }
