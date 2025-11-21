@@ -1,5 +1,10 @@
-export type CRDTUpdate = {
-    key: string;
+
+
+export interface CharNode {
+    id: string;
     value: string;
-    timestamp:number
-};
+    origin: string;
+    tombstone: boolean;
+    timestamp: number;
+    lamport: number;
+}
