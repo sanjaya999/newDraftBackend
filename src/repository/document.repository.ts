@@ -91,6 +91,17 @@ export async function getDocumentCollaborators(documentId: string) {
   });
 }
 
+export async function getCollaborationDocument(userId: string){
+  return prisma.documentPermission.findMany({
+    where: { userId },
+    include: {
+      document: {
+        select: { id: true, title: true, docType: true}
+      }
+    }
+  });
+}
+
 export async function deleteDocumentPermission(permissionId: string) {
   return prisma.documentPermission.delete({
     where: { id: permissionId }
