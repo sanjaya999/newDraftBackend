@@ -118,4 +118,15 @@ export class SharedCRDT {
     getAll() {
         return this.struct;
     }
+
+    load(state: CharNode[]) {
+        this.struct = state;
+        let maxLamport = 0;
+        for (const node of state) {
+            if (node.lamport > maxLamport) {
+                maxLamport = node.lamport;
+            }
+        }
+        this.clock = maxLamport;
+    }
 }

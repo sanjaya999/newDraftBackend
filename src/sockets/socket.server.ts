@@ -1,13 +1,9 @@
 import { Server, Socket} from "socket.io";
 import type { DocumentData } from "../types/documents.js";
 import { env } from "../infrastructure/envConfig.js";
-import { StatusCodes } from "http-status-codes";
 import { socketAuth } from "../middleware/authenticate.js";
-import { logger } from "../infrastructure/logger.js";
-import { joinDocument, persistDocument } from "../utils/document.manager.js";
-import { success } from "zod";
 import { registerDocumentHandlers } from "../services/socket.doc.js";
-import { socketAuthorize } from "../middleware/authorization.js";
+import { registerCrdtHandlers } from "../services/socket.crdt.js";
 
 const documents= new Map<string, DocumentData>();
 
@@ -36,6 +32,7 @@ function setupSocketHandlers(io: Server){
 
     io.on('connection' , (socket: Socket) =>{
     registerDocumentHandlers(socket);
+    registerCrdtHandlers(socket);
     })
 
 }
