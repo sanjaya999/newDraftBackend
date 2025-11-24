@@ -63,6 +63,7 @@ export class SharedCRDT {
        while (i < this.struct.length) {
             const other = this.struct[i];
             if (!other) break;
+
             if (other.lamport > node.lamport) break;
             if (other.lamport === node.lamport && other.id > node.id) break;
             
@@ -72,10 +73,33 @@ export class SharedCRDT {
         return true;
      }
   toString(): string {
-    return this.struct
-      .filter(n => !n.tombstone && n.id !== 'ROOT')
-      .map(n => n.value)
-      .join('');
+   const active = this.struct.filter(n=> !n.tombstone && n.id !== 'ROOT');   
+   const childMap = new Map<string, CharNode[]>();
+   for(const node of active){
+    if(!childMap.has(node.origin)){
+        childMap.set(node.origin, []);
+    }
+    childMap.get(node.origin)!.push(node);
+   }
+
+   for(const children of childMap.values()){
+    children.sort((a,b)=>{
+        if(a.lamport !== b.lamport) return b.lamport - a.lamport;
+        return b.id.localeCompare(a.id);
+    })
+   }
+   
+   const result : string[] = [];
+   const traverse = (parentId: string)=>{
+    const children= childMap.get(parentId) || [];
+    console.log(` [traverse] Parent: ${parentId}, Children:`, children.map(c => c.value));
+    for(const child of children){
+        result.push(child.value);
+        traverse(child.id)
+    }
+   };
+   traverse("ROOT");
+      return result.join("");
   }
 
     private findNthVisibleNode(n: number): CharNode | undefined{
