@@ -24,9 +24,7 @@ async function onCustomDocumentJoin(
 }
 
 export async function onCustomDocumentSync(socket: Socket, docID: string, update: Uint8Array) {
-  // This function seems unused in the original code for Custom CRDTs 
-  // as they use 'cdocument:update' with JSON, but keeping signature if needed.
-  // For Custom CRDT, we use 'cdocument:update'
+
 }
 
 function onCustomDocumentAwareness(socket: Socket, docID: string, update: any) {
@@ -47,12 +45,6 @@ function onCustomDocumentUpdate(socket: Socket, docID: string, update: any) {
 }
 
 function onDisconnect(socket: Socket) {
-  // We need to iterate over customDocuments to find where this socket was connected
-  // This is slightly inefficient but necessary if we don't track rooms separately
-  // Or we can rely on socket.rooms if called before full disconnect cleanup?
-  // Socket.io 'disconnect' event fires, but rooms might be cleared.
-  // Better to iterate our map.
-  
   customDocuments.forEach((docData, docID) => {
     if (docData.connections.has(socket.id)) {
       docData.connections.delete(socket.id);
@@ -94,9 +86,11 @@ export function registerCrdtHandlers(socket: Socket) {
         onCustomDocumentAwareness(socket, docID, Selection);
       }
     } catch (error: any) {
-       // Silent fail or log
     }
   });
+  socket.on("cdocument:leave" , (docID: string)=>{
+    socket.leave(docID);
+  })
 
   socket.on("disconnect", () => {
       onDisconnect(socket);
