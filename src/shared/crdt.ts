@@ -1,4 +1,5 @@
 import type { CharNode } from "./crdtTypes.js";
+
 export class SharedCRDT {
     siteId: string;
     struct: CharNode[];
@@ -7,7 +8,6 @@ export class SharedCRDT {
     constructor(siteId: string = Math.random().toString(36).slice(2)){
         this.siteId = siteId;
         this.clock = 0;
-
         this.struct = [{
             id: "ROOT", 
             value: "",
@@ -18,10 +18,42 @@ export class SharedCRDT {
         }];
     }
 
-    localInsert(char: string, visibleIndex: number): CharNode{
+    private getSortedNodes(): CharNode[] {
+        const active = this.struct.filter(n => !n.tombstone && n.id !== 'ROOT');   
+        const childMap = new Map<string, CharNode[]>();
+        
+        for(const node of active){
+            if(!childMap.has(node.origin)) childMap.set(node.origin, []);
+            childMap.get(node.origin)!.push(node);
+        }
+
+        for(const children of childMap.values()){
+            children.sort((a,b) => {
+                if(a.lamport !== b.lamport) return b.lamport - a.lamport;
+                return b.id.localeCompare(a.id);
+            })
+        }
+        
+        const result: CharNode[] = [];
+        const traverse = (parentId: string) => {
+            const children = childMap.get(parentId) || [];
+            for(const child of children){
+                result.push(child);
+                traverse(child.id);
+            }
+        };
+        traverse("ROOT");
+        return result;
+    }
+
+    localInsert(char: string, visibleIndex: number): CharNode {
         this.clock++;
 
-        const leftNode = this.findNthVisibleNode(visibleIndex - 1);
+        const sortedNodes = this.getSortedNodes();
+        const leftNode = visibleIndex === 0 
+            ? this.struct[0]
+            : sortedNodes[visibleIndex - 1];
+
         if(!leftNode) throw new Error("Origin missing");
 
         const newNode : CharNode = {
@@ -33,88 +65,42 @@ export class SharedCRDT {
             lamport: this.clock
         }
 
-        const realIndex = this.struct.findIndex(n => n.id === leftNode.id);
-        this.struct.splice(realIndex + 1, 0 , newNode);
+        this.struct.push(newNode);
         return newNode;
     }
 
     localDelete(visibleIndex: number) : CharNode {
         this.clock++;
-        const targetNode = this.findNthVisibleNode(visibleIndex);
+        
+        const sortedNodes = this.getSortedNodes();
+        const targetNode = sortedNodes[visibleIndex];
+        
         if(targetNode){
             targetNode.tombstone = true;
             return targetNode;
         }
         throw new Error("Node not found");
     }
-     merge(node: CharNode): boolean{
+
+    merge(node: CharNode): boolean {
         if(node.lamport > this.clock){
             this.clock = node.lamport;
         }
+
         const existing = this.struct.find(n=> n.id === node.id);
         if(existing){
             if(node.tombstone) existing.tombstone = true;
             return false;
         }
 
-        let insertIndex = this.struct.findIndex( n => node.origin === n.id);
-        if(insertIndex === -1) insertIndex = 0;
-        let i = insertIndex + 1;
-       while (i < this.struct.length) {
-            const other = this.struct[i];
-            if (!other) break;
-
-            if (other.lamport > node.lamport) break;
-            if (other.lamport === node.lamport && other.id > node.id) break;
-            
-            i++;
-        }
-        this.struct.splice(i, 0 , node);
+        this.struct.push(node);
         return true;
-     }
-  toString(): string {
-   const active = this.struct.filter(n=> !n.tombstone && n.id !== 'ROOT');   
-   const childMap = new Map<string, CharNode[]>();
-   for(const node of active){
-    if(!childMap.has(node.origin)){
-        childMap.set(node.origin, []);
     }
-    childMap.get(node.origin)!.push(node);
-   }
 
-   for(const children of childMap.values()){
-    children.sort((a,b)=>{
-        if(a.lamport !== b.lamport) return b.lamport - a.lamport;
-        return b.id.localeCompare(a.id);
-    })
-   }
-   
-   const result : string[] = [];
-   const traverse = (parentId: string)=>{
-    const children= childMap.get(parentId) || [];
-    console.log(` [traverse] Parent: ${parentId}, Children:`, children.map(c => c.value));
-    for(const child of children){
-        result.push(child.value);
-        traverse(child.id)
+    toString(): string {
+        return this.getSortedNodes().map(n => n.value).join("");
     }
-   };
-   traverse("ROOT");
-      return result.join("");
-  }
 
-    private findNthVisibleNode(n: number): CharNode | undefined{
-        if(n === -1 )return this.struct[0];
-        let count = 0;
-        for(let i = 1 ; i < this.struct.length; i++){
-            const currentNode = this.struct[i];
-            if(!currentNode.tombstone){
-                if(count === n)return currentNode;
-                count++;
-            }
-            
-        }return undefined;
-    }
-    
     getAll() {
         return this.struct;
     }
@@ -123,10 +109,14 @@ export class SharedCRDT {
         this.struct = state;
         let maxLamport = 0;
         for (const node of state) {
-            if (node.lamport > maxLamport) {
-                maxLamport = node.lamport;
-            }
+            if (node.lamport > maxLamport) maxLamport = node.lamport;
         }
         this.clock = maxLamport;
+    }
+    
+    private findNthVisibleNode(n: number): CharNode | undefined {
+        if(n === -1 ) return this.struct[0];
+        const sorted = this.getSortedNodes();
+        return sorted[n];
     }
 }
