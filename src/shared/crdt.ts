@@ -89,7 +89,10 @@ export class SharedCRDT {
 
         const existing = this.struct.find(n=> n.id === node.id);
         if(existing){
-            if(node.tombstone) existing.tombstone = true;
+            if(node.tombstone) {
+                existing.tombstone = true;
+                return true;
+            }
             return false;
         }
 
