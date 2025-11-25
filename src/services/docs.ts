@@ -1,9 +1,10 @@
 import type { CreateDocumentInput, UpdateDocumentInput } from "../types/documents.js";
-import { createDocument, findDocumentById, getDocumentCollaborators, upsertDocumentPermission, updateDocument, findDocument } from "../repository/document.repository.js";
+import { createDocument, findDocumentById, getDocumentCollaborators, upsertDocumentPermission, updateDocument, findDocument, getCollaborationDocument } from "../repository/document.repository.js";
 import { ApiError } from "../core/ApiError.js";
 import { StatusCodes } from "http-status-codes";
 import type { Document, DocumentRole } from "@prisma/client";
 import { findUserByEmail } from "../repository/user.repository.js";
+import { notificationController } from "../api/notification.controller.js";
 
 export async function createNewDocument(
   ownerId: string,
@@ -25,6 +26,15 @@ export async function getAllDocument(userId: string){
     throw new ApiError("Document not found", StatusCodes.NOT_FOUND);
   }
   return {document};
+}
+
+export async function getDocumentCollaboratorsService(id: string){
+  const collaborators = await getDocumentCollaborators(id);
+  return {collaborators};
+}
+export async function getAllCollaborationDocument(userId: string){
+  const documents = await getCollaborationDocument(userId);
+  return {documents};
 }
 
 export async function getDocumentById(id: string, userId: string) {
@@ -81,6 +91,13 @@ export async function addCollaborator(
     user.id,
     role
   )
+
+  await notificationController(
+    user.id,
+    `You have been added as a ${role} to "${document.title}"`,
+    documentId,
+    requesterId
+  );
 
   return{
     collaborator:{

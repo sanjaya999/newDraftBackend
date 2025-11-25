@@ -8,6 +8,7 @@ import router from "./routes/auth.route.js";
 import authRouter from "./routes/auth.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
 import documentRouter from "./routes/docs.route.js";
+import notificationRouter from "./routes/notification.route.js";
 import { initCollabServer } from "./sockets/socket.server.js";
 import { createServer } from "http";
 import { startPersistence } from "./utils/document.manager.js";
@@ -60,6 +61,7 @@ app.get("/", (req, res) => {
 
 app.use("/auth" , authRouter);
 app.use("/docs" , documentRouter )
+app.use("/notifications", notificationRouter);
 
 logger.info(`Environment: ${env.NODE_ENV}`);
 

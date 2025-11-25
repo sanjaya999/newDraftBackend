@@ -1,19 +1,21 @@
 import { Server, Socket} from "socket.io";
 import type { DocumentData } from "../types/documents.js";
 import { env } from "../infrastructure/envConfig.js";
-import { StatusCodes } from "http-status-codes";
 import { socketAuth } from "../middleware/authenticate.js";
-import { logger } from "../infrastructure/logger.js";
-import { joinDocument, persistDocument } from "../utils/document.manager.js";
-import { success } from "zod";
 import { registerDocumentHandlers } from "../services/socket.doc.js";
-import { socketAuthorize } from "../middleware/authorization.js";
+import { registerCrdtHandlers } from "../services/socket.crdt.js";
+import { notificationHandler } from "../services/notificationHandler.js";
 
 const documents= new Map<string, DocumentData>();
+export const userSocketMap = new Map<string, string>();
+let io: Server;
 
 export function initCollabServer(httpServer:any) : Server {
     const allowedOrigins = JSON.parse(env.CORS_ORIGIN);
-    const io = new Server(httpServer, {
+    if (io) {
+        return io; 
+    }
+    io = new Server(httpServer, {
         cors: {
             origin:(origin, callback)=>{
                 if(!origin || allowedOrigins.indexOf(origin) !== -1){
@@ -29,64 +31,29 @@ export function initCollabServer(httpServer:any) : Server {
     return io;
 }
 
+export function getIO(): Server {
+    if (!io) {
+        throw new Error("Socket.io not initialized!");
+    }
+    return io;
+}
+
 function setupSocketHandlers(io: Server){
     io.use(socketAuth);
     // io.use(socketAuthorize("read"))
     
 
     io.on('connection' , (socket: Socket) =>{
-    //     const userId = socket.data.user.id;
-    //     const socketId = socket.id;
-
-    //     logger.info(`Socket ${socketId} connected (User ${userId})`);
-
-    //     socket.on("document:join" , async(docID: string, callback)=>{
-    //         try{
-    //             socket.join(docID);
-    //             const result = await joinDocument(docID, userId , socketId);
-    //             if(result.success){
-    //                 callback({
-    //                     success:true,
-    //                     state: result.state,
-    //                 })
-    //                 logger.info(`User ${userId} joined doc ${docID}`);
-    //             }else {
-    //                 callback({ success: false, error: result.error });
-    //             }
-    //         }catch (err : any) {
-    //             logger.error(`Error in document:join:`, err);
-    //             callback({ success: false, error: "Server error" });
-    //  }
-    //     })
-
-    //     socket.on('disconnect' , (reason)=>{
-    //         logger.info(`Socket ${socketId} disconnected`);
-    //         socket.rooms.forEach((docID)=>{
-    //             if(docID === socket.id)return;
-    //             const docData = documents.get(docID);
-    //             if(docData){
-    //                 docData.connections.delete(socket.id);
-    //                 logger.info(`Removed ${socketId} from doc ${docID}`);
-    //             }
-    //             if (docData?.connections.size === 0) {
-    //                 logger.info(`Document ${docID} is now empty. Persisting and removing.`);
-          
-    //                 persistDocument(docID);
-          
-    //                 docData.ydoc.destroy(); 
-    //                     documents.delete(docID);
-    //             }
-    //         })
-    //     })
-
-    //     socket.on('error', (error) => {
-    //         console.error('Socket error:', error);
-    //     });
-
-    //     io.engine.on('connection_error', (err) => {
-    //         console.error(' Connection error:', err);
-    //     });
+    const userId = socket.data.user?.id;
+    if(userId){
+        userSocketMap.set(userId, socket.id);
+        socket.on('disconnect', () => {
+            userSocketMap.delete(userId);
+        });
+    }
     registerDocumentHandlers(socket);
+    registerCrdtHandlers(socket);
+    notificationHandler(socket);
     })
 
 }

@@ -3,7 +3,6 @@ import { documents, joinDocument, persistDocument } from "../utils/document.mana
 import { logger } from "../infrastructure/logger.js";
 import * as Y from "yjs";
 import { checkDocumentPermission } from "./permissionService.js";
-import { PERMISSIONS } from "../types/permissions.js";
 
 async function onDocumentJoin(
   socket: Socket,
@@ -70,7 +69,6 @@ function onDocumentAwareness(socket: Socket, docID: string, update: Uint8Array) 
 export function registerDocumentHandlers(socket: Socket) {
   const userId = socket.data.user.id || "anonymous";
   logger.info(`Registering handlers for socket ${socket.id} (User ${userId})`);
-
 
   socket.on("document:join", async (docID, callback) => {
     try {

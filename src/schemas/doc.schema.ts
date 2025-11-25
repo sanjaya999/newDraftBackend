@@ -3,6 +3,7 @@ import z from "zod";
 export const createDocumentSchema = z.object({
   body: z.object({
     title: z.string(),
+    docType: z.enum(["YJS", "CCRDT"]).optional(),
     content: z.any().optional(),
   }),
 });

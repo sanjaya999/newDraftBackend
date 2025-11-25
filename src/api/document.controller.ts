@@ -3,14 +3,15 @@ import type{ Request, Response } from "express";
 import { createDocument, upsertDocumentPermission } from "../repository/document.repository.js";
 import { sendResponse } from "../utils/response.js";
 import { StatusCodes } from "http-status-codes";
-import { addCollaborator, getDocumentById, updateDocumentService, getAllDocument } from "../services/docs.js";
+import { addCollaborator, getDocumentById, updateDocumentService, getAllDocument, getAllCollaborationDocument, getDocumentCollaboratorsService } from "../services/docs.js";
 
 export const createDocumentController = asyncHandler(async(req: Request, res:Response)=>{
     const userId = req.user?.id;
-    const { title } = req.body;
+    const { title, docType } = req.body;
 
     const result = await createDocument(userId, {
         title,
+        docType,
     });
     return sendResponse(res, StatusCodes.CREATED, {
         data: result,
@@ -74,3 +75,22 @@ export const updateDocumentController = asyncHandler(
     });
   }
 );
+
+export const getAllCollaborationDocumentController = asyncHandler(async(req:Request , res:Response)=>{
+    const userId = req.user.id;
+    const result = await getAllCollaborationDocument(userId);
+    return sendResponse(res, StatusCodes.OK,{
+        data: result.documents,
+        message:"Document fetched success"
+    })
+})
+
+export const getAllCollaborators = asyncHandler(async(req:Request , res:Response)=>{
+    const userId = req.user.id;
+    const documentId = req.params.docID!;
+    const result = await getDocumentCollaboratorsService(documentId);
+    return sendResponse(res, StatusCodes.OK,{
+        data: result.collaborators,
+        message:"Collaborators fetched success"
+    })
+})

@@ -6,6 +6,7 @@ export const documentSelectPublic = {
     id: true,
     title: true,
     ownerId: true,
+    docType: true,
     createdAt: true,
     updatedAt: true,
 }satisfies Prisma.DocumentSelect;
@@ -22,6 +23,7 @@ export async function createDocument(
   return prisma.document.create({
     data: {
       title: createDocumentInput.title ?? 'Untitled Document',
+      ...(createDocumentInput.docType && { docType: createDocumentInput.docType }),
       ownerId,
     },
     select: documentSelectPublic,
@@ -84,6 +86,17 @@ export async function getDocumentCollaborators(documentId: string) {
     include: {
       user: {
         select: { id: true, email: true, name: true }
+      }
+    }
+  });
+}
+
+export async function getCollaborationDocument(userId: string){
+  return prisma.documentPermission.findMany({
+    where: { userId },
+    include: {
+      document: {
+        select: { id: true, title: true, docType: true}
       }
     }
   });
