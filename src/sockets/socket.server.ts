@@ -42,7 +42,6 @@ function setupSocketHandlers(io: Server){
     io.use(socketAuth);
     // io.use(socketAuthorize("read"))
     
-
     io.on('connection' , (socket: Socket) =>{
     const userId = socket.data.user?.id;
     if(userId){
