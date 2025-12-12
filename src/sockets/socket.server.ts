@@ -44,6 +44,8 @@ function setupSocketHandlers(io: Server){
     
     io.on('connection' , (socket: Socket) =>{
     const userId = socket.data.user?.id;
+    const name = socket.data.user?.name;
+    console.log("user connected" , userId, name)
     if(userId){
         userSocketMap.set(userId, socket.id);
         socket.on('disconnect', () => {

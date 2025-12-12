@@ -47,6 +47,8 @@ export async function joinCustomDocument(
     const docData = customDocuments.get(docID)!;
     docData.connections.add(socketId);
 
+    
+
     return {
       success: true,
       state: docData.crdt.getAll(),

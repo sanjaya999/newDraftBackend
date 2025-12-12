@@ -70,9 +70,8 @@ export interface CustomDocumentData{
  lastSaved : number; 
 }
 
-export interface ActiveUser{
+export interface UserConnection{
   socketId: string;
   userId: string;
   userName: string | null;
-  color: string;
 }
