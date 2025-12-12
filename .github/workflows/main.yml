@@ -84,9 +84,10 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/${{ github.actor }}/newdraftbackend:latest
-      - name: Trigger Northflank Deployment
-        run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.NORTHFLANK_API }}" \
-            -H "Content-Type: application/json" \
-            https://api.northflank.com/v1/projects/${{ secrets.NORTHFLANK_PROJECTID }}/services/${{ secrets.SERVICE_ID }}/build-service/deploy
+      - name: Deploy to Northflank
+        uses: northflank/deploy-to-northflank@v1
+        with:
+          northflank-api-key: ${{ secrets.NORTHFLANK_API }}
+          project-id: ${{ secrets.NORTHFLANK_PROJECTID }}
+          service-id: ${{ secrets.SERVICE_ID }}
+          image-path: ghcr.io/${{ github.actor }}/newdraftbackend:latest
