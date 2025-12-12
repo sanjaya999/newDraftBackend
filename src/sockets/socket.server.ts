@@ -44,7 +44,7 @@ export function getIO(): Server {
 }
 
 function setupSocketHandlers(io: Server){
-    // io.use(socketAuth);
+    io.use(socketAuth);
     // io.use(socketAuthorize("read"))
     
     io.on('connection' , (socket: Socket) =>{
