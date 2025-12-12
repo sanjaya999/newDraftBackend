@@ -4,7 +4,6 @@ import { env } from "./infrastructure/envConfig.js"
 import helmet from "helmet";
 import { logger } from "./infrastructure/logger.js";
 import { prisma } from "./infrastructure/database.js";
-import router from "./routes/auth.route.js";
 import authRouter from "./routes/auth.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
 import documentRouter from "./routes/docs.route.js";
@@ -34,6 +33,10 @@ app.use(cors({
   }
 }));
 
+app.use("/auth" , authRouter);
+app.use("/docs" , documentRouter )
+app.use("/notifications", notificationRouter);
+
 const startServer = async ()=>{
   try{
     await prisma.$connect();
@@ -62,9 +65,6 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-app.use("/auth" , authRouter);
-app.use("/docs" , documentRouter )
-app.use("/notifications", notificationRouter);
 
 logger.info(`Environment: ${env.NODE_ENV}`);
 
