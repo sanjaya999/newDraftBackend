@@ -20,8 +20,7 @@ RUN npx prisma generate
 COPY . .
 
 # Run build command and Prisma generation
-RUN npm run build \
-    && npx prisma generate
+RUN npm run build
 
 # --- STAGE 2: PRODUCTION RUNTIME ---
 # Use a slim, secure image for the final runtime environment
