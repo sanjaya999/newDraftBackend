@@ -14,6 +14,7 @@ import { startPersistence } from "./utils/document.manager.js";
 
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 app.use(helmet());
 const PORT = Number(process.env.PORT) || 8080;
