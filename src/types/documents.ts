@@ -69,3 +69,9 @@ export interface CustomDocumentData{
  connections: Set<string>;
  lastSaved : number; 
 }
+
+export interface UserConnection{
+  socketId: string;
+  userId: string;
+  userName: string | null;
+}
