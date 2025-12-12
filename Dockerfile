@@ -10,6 +10,12 @@ COPY package*.json ./
 # Install dependencies (including devDependencies needed for build)
 RUN npm install
 
+# 2. Copy Prisma schema before generating client
+COPY prisma ./prisma
+
+# 3. Generate Prisma client
+RUN npx prisma generate
+
 # Copy source code
 COPY . .
 
@@ -36,7 +42,7 @@ COPY --from=builder /usr/src/app/package*.json ./
 # **CRITICAL**: Adjust 'dist' if your build output goes elsewhere!
 COPY --from=builder /usr/src/app/dist ./dist 
 # 4. Copy the PM2 config file and Prisma schema/binary
-COPY --from=builder /usr/src/app/ecosystem.config.js .
+COPY --from=builder /usr/src/app/ecosystem.config.cjs .
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 # Expose port (8080 is correctly exposed)
@@ -45,4 +51,4 @@ EXPOSE 8080
 # Start the application with PM2 and run migrations first
 # Note: You need to install the 'prisma' CLI globally or locally 
 # for 'npx prisma' to work correctly in this final stage. 
-CMD ["sh", "-c", "npx prisma migrate deploy && pm2-runtime ecosystem.config.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && pm2-runtime ecosystem.config.cjs"]
