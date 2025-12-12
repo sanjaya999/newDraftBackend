@@ -64,8 +64,6 @@ jobs:
     name: Push to GHCR & Redeploy on Northflank
     runs-on: ubuntu-latest
     needs: build
-    env:
-      DATABASE_URL: "file:./dev.db"
     permissions:
       contents: read
       packages: write
