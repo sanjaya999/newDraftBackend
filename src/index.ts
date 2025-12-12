@@ -16,7 +16,7 @@ import { startPersistence } from "./utils/document.manager.js";
 const app = express();
 const httpServer = createServer(app);
 app.use(helmet());
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = Number(process.env.PORT) || 8080;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));

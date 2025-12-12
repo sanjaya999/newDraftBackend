@@ -17,15 +17,16 @@ export function initCollabServer(httpServer:any) : Server {
     }
     io = new Server(httpServer, {
         cors: {
-            origin:(origin, callback)=>{
-                if(!origin || allowedOrigins.indexOf(origin) !== -1){
-                    callback(null, true);
-                }else{
-                    callback(new Error("Not allowed by cors"));
-                }
-            },
-            methods: ["GET", "POST"],
-            credentials: true
+            // origin:(origin, callback)=>{
+            //     if(!origin || allowedOrigins.indexOf(origin) !== -1){
+            //         callback(null, true);
+            //     }else{
+            //         callback(new Error("Not allowed by cors"));
+            //     }
+            // },
+            origin : "*",
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            credentials: true,
         },
         transports: ['websocket', 'polling'],
         pingTimeout: 60000,
