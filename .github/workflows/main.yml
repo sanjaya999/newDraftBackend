@@ -79,8 +79,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.actor }}/newDraftBackend:latest .
+          docker build -t ghcr.io/${{ github.actor }}/newdraftbackend:latest .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.actor }}/newDraftBackend:latest
+          docker push ghcr.io/${{ github.actor }}/newdraftbackend:latest
