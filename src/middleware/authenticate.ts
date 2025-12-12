@@ -25,26 +25,28 @@ export const authenticate = asyncHandler(async(req:Request , res:Response , next
         next();
 }
 )
-
-export async function socketAuth(socket: Socket, next:(err? : ApiError)=>void){
-    try{
+export async function socketAuth(socket: Socket, next: (err?: Error) => void) {
+    try {
         const token = socket.handshake.auth.token ||
-        socket.handshake.headers.authorization?.replace("Bearer ","") ||
-        socket.handshake.query.token as string;
+            socket.handshake.headers.authorization?.replace("Bearer ", "") ||
+            socket.handshake.query.token as string;
 
-            if (!token) {
-                return next(new ApiError('Socket requires auth token' , StatusCodes.UNAUTHORIZED));
-            }
+        if (!token) {
+            return next(new Error('Unauthorized: Socket requires auth token'));
+        }
 
         const decodedToken = jwt.verify(token, env.JWT_ACCESS_SECRET) as jwt.JwtPayload;
         const user = await findUserById(decodedToken?.id);
-         if(!user){
-            throw new ApiError("Invalid Access Token" , StatusCodes.UNAUTHORIZED)
+
+        if (!user) {
+            return next(new Error("Unauthorized: Invalid Access Token"));
         }
+
         socket.data.user = user;
-        console.log("conencting user ,", socket.data.user)
+        console.log("connecting user ,", socket.data.user);
         next();
-    }catch(error){
-        return next(new ApiError('Socket requires auth token' , StatusCodes.UNAUTHORIZED));
+
+    } catch (error) {
+        return next(new Error('Unauthorized: Token validation failed'));
     }
 }
