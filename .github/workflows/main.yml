@@ -81,7 +81,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.actor }}/newdraftbackend:latest .
+          docker build --build-arg DATABASE_URL="file:./temp.db" -t ghcr.io/${{ github.actor }}/newdraftbackend:latest .
 
       - name: Push Docker image
         run: |
