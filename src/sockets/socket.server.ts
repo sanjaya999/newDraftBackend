@@ -23,9 +23,13 @@ export function initCollabServer(httpServer:any) : Server {
                 }else{
                     callback(new Error("Not allowed by cors"));
                 }
-            }
-            // credentials:true,
-        }
+            },
+            methods: ["GET", "POST"],
+            credentials: true
+        },
+        transports: ['websocket', 'polling'],
+        pingTimeout: 60000,
+        pingInterval: 25000
     })
     setupSocketHandlers(io);
     return io;
