@@ -7,6 +7,11 @@ WORKDIR /usr/src/app
 # Copy package files first
 COPY package*.json ./
 
+RUN apt-get update && apt-get install -y \
+    openssl \
+    libssl1.1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 # Install dependencies (including devDependencies needed for build)
 RUN npm install
 
