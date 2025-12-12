@@ -54,6 +54,9 @@ const startServer = async ()=>{
 }
 startServer();
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true });
+});
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
