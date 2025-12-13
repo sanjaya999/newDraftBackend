@@ -17,7 +17,7 @@ const app = express();
 app.set('trust proxy', 1);
 const httpServer = createServer(app);
 app.use(helmet());
-const PORT = Number(process.env.PORT) || 8080;
+const PORT = Number(process.env.PORT) || 8000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
