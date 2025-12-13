@@ -11,13 +11,13 @@ import notificationRouter from "./routes/notification.route.js";
 import { initCollabServer } from "./sockets/socket.server.js";
 import { createServer } from "http";
 import { startPersistence } from "./utils/document.manager.js";
+import { persistCustomDocument } from "./utils/crdt.manager.js";
 
 
 const app = express();
 app.set('trust proxy', 1);
 const httpServer = createServer(app);
 app.use(helmet());
-const PORT = Number(process.env.PORT) || 8000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
@@ -60,8 +60,8 @@ const startServer = async ()=>{
     const io = initCollabServer(httpServer);
     logger.info("socket.io server initilized");
 
-    httpServer.listen(PORT, '0.0.0.0', ()=>{
-      logger.info(`Server is running on http://localhost:${PORT}`);
+    httpServer.listen(process.env.PORT,  ()=>{
+      logger.info(`Server is running on http://localhost:${process.env.PORT}`);
       logger.info(`socket ready`);
     }); 
   }catch(error){
