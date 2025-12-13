@@ -49,8 +49,8 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/ecosystem.config.cjs .
 COPY --from=builder /usr/src/app/prisma ./prisma
 
-# Expose port (8080 is correctly exposed)
-EXPOSE 8080
+# Expose port (8000 is correctly exposed)
+EXPOSE 8000
 
 # Start the application with PM2 and run migrations first
 # Note: You need to install the 'prisma' CLI globally or locally 
