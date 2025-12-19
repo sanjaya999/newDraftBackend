@@ -12,6 +12,7 @@ import { initCollabServer } from "./sockets/socket.server.js";
 import { createServer } from "http";
 import { startPersistence } from "./utils/document.manager.js";
 import { persistCustomDocument } from "./utils/crdt.manager.js";
+import { globalLimiter } from "./utils/rateLimiter.js";
 
 
 const app = express();
@@ -32,6 +33,8 @@ app.use(cors({
     }
   }
 }));
+
+app.use(globalLimiter);
 
 app.use("/auth" , authRouter);
 app.use("/docs" , documentRouter )
