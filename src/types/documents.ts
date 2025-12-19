@@ -1,27 +1,26 @@
-import { DocumentRole } from '@prisma/client';
-import * as Y from 'yjs'
-import type { SharedCRDT } from '../shared/crdt.js';
+import { DocumentRole } from "@prisma/client";
+import * as Y from "yjs";
+import type { SharedCRDT } from "../shared/crdt.js";
 
 export enum DocumentType {
-  YJS = 'YJS',
-  CCRDT = 'CCRDT'
+  YJS = "YJS",
+  CCRDT = "CCRDT",
 }
 
-export interface DocumentData{
+export interface DocumentData {
   ydoc: Y.Doc;
   connections: Set<string>;
-  lastSaved : string
+  lastSaved: string;
 }
 
 export interface DocumentMetaData {
-    id: string;
-    title: string;
-    ownerId: string;
-    docType: DocumentType;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  title: string;
+  ownerId: string;
+  docType: DocumentType;
+  createdAt: string;
+  updatedAt: string;
 }
-
 
 export interface CreateDocumentInput {
   title?: string;
@@ -52,7 +51,7 @@ export interface DocumentAccessCheck {
 }
 
 export interface WSMessage {
-  type: 'sync' | 'awareness' | 'ping' | 'pong';
+  type: "sync" | "awareness" | "ping" | "pong";
   documentId?: string;
   data?: Uint8Array;
 }
@@ -64,13 +63,13 @@ export interface ConnectedClient {
   lastSeen: Date;
 }
 
-export interface CustomDocumentData{
- crdt: SharedCRDT;
- connections: Set<string>;
- lastSaved : number; 
+export interface CustomDocumentData {
+  crdt: SharedCRDT;
+  connections: Set<string>;
+  lastSaved: number;
 }
 
-export interface UserConnection{
+export interface UserConnection {
   socketId: string;
   userId: string;
   userName: string | null;
