@@ -28,7 +28,7 @@ export const shareDocumentSchema = z.object({
   body: z.object({
     email: z.string().email(),
     role: z.enum(["VIEWER", "EDITOR"]),
-  })
+  }),
 });
 
 export const removeCollaboratorSchema = z.object({
@@ -37,4 +37,3 @@ export const removeCollaboratorSchema = z.object({
     permissionId: z.string(),
   }),
 });
-

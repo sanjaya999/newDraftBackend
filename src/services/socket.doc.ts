@@ -1,5 +1,9 @@
 import type { Socket } from "socket.io";
-import { documents, joinDocument, persistDocument } from "../utils/document.manager.js";
+import {
+  documents,
+  joinDocument,
+  persistDocument,
+} from "../utils/document.manager.js";
 import { logger } from "../infrastructure/logger.js";
 import * as Y from "yjs";
 import { checkDocumentPermission } from "./permissionService.js";
@@ -8,7 +12,7 @@ async function onDocumentJoin(
   socket: Socket,
   userId: string,
   docID: string,
-  callback: (resp: any) => void
+  callback: (resp: any) => void,
 ) {
   try {
     socket.join(docID);
@@ -18,7 +22,7 @@ async function onDocumentJoin(
       callback({
         success: true,
         state: result.state,
-      })
+      });
       logger.info(`User ${userId} joined doc ${docID}`);
     } else {
       callback({ success: false, error: result.error });
@@ -29,7 +33,11 @@ async function onDocumentJoin(
   }
 }
 
-export async function onDocumentSync(socket: Socket, docID: string, update: Uint8Array) {
+export async function onDocumentSync(
+  socket: Socket,
+  docID: string,
+  update: Uint8Array,
+) {
   try {
     const docData = documents.get(docID);
     if (docData) {
@@ -62,7 +70,11 @@ function onDisconnect(socket: Socket) {
   });
 }
 
-function onDocumentAwareness(socket: Socket, docID: string, update: Uint8Array) {
+function onDocumentAwareness(
+  socket: Socket,
+  docID: string,
+  update: Uint8Array,
+) {
   socket.to(docID).emit("document:awareness", update);
 }
 
@@ -75,7 +87,9 @@ export function registerDocumentHandlers(socket: Socket) {
       await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
       onDocumentJoin(socket, userId, docID, callback);
     } catch (error: any) {
-      logger.warn(`User ${userId} denied access to document ${docID}: ${error.message}`);
+      logger.warn(
+        `User ${userId} denied access to document ${docID}: ${error.message}`,
+      );
       callback({ success: false, error: error.message || "Access denied" });
     }
   });
@@ -85,10 +99,12 @@ export function registerDocumentHandlers(socket: Socket) {
       await checkDocumentPermission(userId, docID, "UPDATE_DOCUMENT");
       onDocumentSync(socket, docID, update);
     } catch (error: any) {
-      logger.warn(`User ${userId} denied sync access to document ${docID}: ${error.message}`);
+      logger.warn(
+        `User ${userId} denied sync access to document ${docID}: ${error.message}`,
+      );
       socket.emit("document:error", {
         docID,
-        error: error.message || "Access denied"
+        error: error.message || "Access denied",
       });
     }
   });
@@ -98,7 +114,9 @@ export function registerDocumentHandlers(socket: Socket) {
       await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
       onDocumentAwareness(socket, docID, update);
     } catch (error: any) {
-      logger.warn(`User ${userId} denied awareness access to document ${docID}: ${error.message}`);
+      logger.warn(
+        `User ${userId} denied awareness access to document ${docID}: ${error.message}`,
+      );
     }
   });
 
