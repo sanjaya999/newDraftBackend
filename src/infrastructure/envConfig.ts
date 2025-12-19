@@ -24,9 +24,9 @@ export const env = cleanEnv(process.env, {
   CORS_ORIGIN: jsonArrayValidator({
     devDefault: testOnly('["http://localhost:8888"]'),
   }),
-  DATABASE_URL: str(),
-  JWT_ACCESS_SECRET: str(),
+  DATABASE_URL: str({ devDefault: testOnly("postgresql://user:pass@localhost:5432/db") }),
+  JWT_ACCESS_SECRET: str({ devDefault: testOnly("test_access_secret") }),
   ACCESS_EXPIRES_IN: str({ devDefault: testOnly("5d") }),
-  JWT_REFRESH_SECRET: str(),
+  JWT_REFRESH_SECRET: str({ devDefault: testOnly("test_refresh_secret") }),
   REFRESH_EXPIRES_IN: str({ devDefault: testOnly("30d") }),
 });

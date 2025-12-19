@@ -5,8 +5,16 @@ import { prisma } from "../infrastructure/database.js";
 vi.mock("../infrastructure/database.js", () => ({
   prisma: {
     notification: {
+      create: vi.fn(),
       findMany: vi.fn(),
     },
+  },
+}));
+
+vi.mock("../sockets/socket.server.js", () => ({
+  getIO: vi.fn(),
+  userSocketMap: {
+    get: vi.fn(),
   },
 }));
 
