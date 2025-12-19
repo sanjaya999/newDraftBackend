@@ -30,13 +30,17 @@ describe("Notification Controller", () => {
       const mockNotifications = [
         { id: "notif-1", message: "Test message", recipientId: "user-123" },
       ];
-      (prisma.notification.findMany as any).mockResolvedValue(mockNotifications);
+      (prisma.notification.findMany as any).mockResolvedValue(
+        mockNotifications,
+      );
 
       await getUserNotifications(req, res);
 
-      expect(prisma.notification.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { recipientId: "user-123" },
-      }));
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { recipientId: "user-123" },
+        }),
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
