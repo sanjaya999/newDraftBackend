@@ -9,7 +9,7 @@ const SAVE_INTERVAL = 30000; // 30 seconds
 export async function joinCustomDocument(
   docID: string,
   userId: string,
-  socketId: string
+  socketId: string,
 ) {
   try {
     logger.info(`User ${userId} joining Custom CRDT doc ${docID}`);
@@ -20,17 +20,20 @@ export async function joinCustomDocument(
       // Load from DB
       const savedDoc = await prisma.document.findUnique({
         where: { id: docID },
-        select: { content: true }
+        select: { content: true },
       });
 
       if (savedDoc?.content) {
         try {
-          const jsonString = Buffer.from(savedDoc.content).toString('utf-8');
+          const jsonString = Buffer.from(savedDoc.content).toString("utf-8");
           const state = JSON.parse(jsonString);
           crdt.load(state);
           logger.info(`Loaded Custom CRDT state for doc ${docID}`);
         } catch (e) {
-          logger.warn(e, `Failed to parse saved state for doc ${docID}. Resetting document state.`);
+          logger.warn(
+            e,
+            `Failed to parse saved state for doc ${docID}. Resetting document state.`,
+          );
           // Fallback: Do nothing, crdt is already initialized as empty
         }
       } else {
@@ -46,8 +49,6 @@ export async function joinCustomDocument(
 
     const docData = customDocuments.get(docID)!;
     docData.connections.add(socketId);
-
-    
 
     return {
       success: true,
@@ -69,7 +70,7 @@ export async function persistCustomDocument(docID: string) {
   try {
     const state = docData.crdt.getAll();
     const jsonString = JSON.stringify(state);
-    const buffer = Buffer.from(jsonString, 'utf-8');
+    const buffer = Buffer.from(jsonString, "utf-8");
 
     await prisma.document.update({
       where: { id: docID },

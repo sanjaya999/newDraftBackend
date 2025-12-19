@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run ESLint
+# npx eslint . --fix
+
+# Run Prettier
+npx prettier --write .
+
+# Run tests (optional)
+npm test
+
+# If any command fails, commit is aborted automatically

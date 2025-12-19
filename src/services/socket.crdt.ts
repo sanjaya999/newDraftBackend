@@ -1,17 +1,17 @@
 import type { Socket } from "socket.io";
 import { logger } from "../infrastructure/logger.js";
 import { checkDocumentPermission } from "./permissionService.js";
-import { 
-  customDocuments, 
-  joinCustomDocument, 
-  persistCustomDocument 
+import {
+  customDocuments,
+  joinCustomDocument,
+  persistCustomDocument,
 } from "../utils/crdt.manager.js";
 
 async function onCustomDocumentJoin(
   socket: Socket,
   userId: string,
   docID: string,
-  callback: (resp: any) => void
+  callback: (resp: any) => void,
 ) {
   try {
     socket.join(docID);
@@ -23,14 +23,16 @@ async function onCustomDocumentJoin(
   }
 }
 
-export async function onCustomDocumentSync(socket: Socket, docID: string, update: Uint8Array) {
-
-}
+export async function onCustomDocumentSync(
+  socket: Socket,
+  docID: string,
+  update: Uint8Array,
+) {}
 
 function onCustomDocumentAwareness(socket: Socket, docID: string, update: any) {
   socket.to(docID).emit("cdocument:awareness", {
     userId: socket.id,
-    ...update
+    ...update,
   });
 }
 
@@ -49,7 +51,9 @@ function onDisconnect(socket: Socket) {
     if (docData.connections.has(socket.id)) {
       docData.connections.delete(socket.id);
       if (docData.connections.size === 0) {
-        logger.info(`Custom CRDT Doc ${docID} is empty. Persisting and removing.`);
+        logger.info(
+          `Custom CRDT Doc ${docID} is empty. Persisting and removing.`,
+        );
         persistCustomDocument(docID);
         customDocuments.delete(docID);
       }
@@ -65,7 +69,9 @@ export function registerCrdtHandlers(socket: Socket) {
       await checkDocumentPermission(userId, docID, "READ_DOCUMENT");
       onCustomDocumentJoin(socket, userId, docID, callback);
     } catch (error: any) {
-      logger.warn(`User ${userId} denied access to custom doc ${docID}: ${error.message}`);
+      logger.warn(
+        `User ${userId} denied access to custom doc ${docID}: ${error.message}`,
+      );
       callback({ success: false, error: error.message || "Access denied" });
     }
   });
@@ -85,14 +91,13 @@ export function registerCrdtHandlers(socket: Socket) {
       if (Selection) {
         onCustomDocumentAwareness(socket, docID, Selection);
       }
-    } catch (error: any) {
-    }
+    } catch (error: any) {}
   });
-  socket.on("cdocument:leave" , (docID: string)=>{
+  socket.on("cdocument:leave", (docID: string) => {
     socket.leave(docID);
-  })
+  });
 
   socket.on("disconnect", () => {
-      onDisconnect(socket);
+    onDisconnect(socket);
   });
 }
