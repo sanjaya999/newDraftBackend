@@ -68,7 +68,7 @@ export class DocumentController {
 
   update = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const { title, content } = req.body;
 
     const result = await this.documentService.update(documentId, { title });
@@ -91,7 +91,7 @@ export class DocumentController {
 
   getCollaborators = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const result = await this.documentService.getCollaborators(documentId);
     return sendResponse(res, StatusCodes.OK, {
       data: result.data,
@@ -132,7 +132,7 @@ export const getAllDocumentController = asyncHandler(
 export const getDocumentController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const id = req.params.id!;
+    const id = req.params.id as string;
 
     const result = await docService.getDocumentById(id, userId);
     return sendResponse(res, StatusCodes.OK, {
@@ -145,7 +145,7 @@ export const getDocumentController = asyncHandler(
 export const addCollaboratorController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const { email, role } = req.body;
 
     const result = await docService.addCollaborator(
@@ -165,7 +165,7 @@ export const addCollaboratorController = asyncHandler(
 export const updateDocumentController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const { title, content } = req.body;
 
     const result = await docService.updateDocumentService(
@@ -194,7 +194,7 @@ export const getAllCollaborationDocumentController = asyncHandler(
 export const getAllCollaborators = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const result = await docService.getDocumentCollaboratorsService(documentId);
     return sendResponse(res, StatusCodes.OK, {
       data: result.collaborators,
