@@ -1,12 +1,9 @@
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import type { Request, Response } from "express";
-import {
-  createDocument,
-  upsertDocumentPermission,
-} from "../repository/document.repository.js";
 import { sendResponse } from "../utils/response.js";
 import { StatusCodes } from "http-status-codes";
 import {
+  createNewDocument,
   addCollaborator,
   getDocumentById,
   updateDocumentService,
@@ -20,13 +17,13 @@ export const createDocumentController = asyncHandler(
     const userId = req.user?.id;
     const { title, docType } = req.body;
 
-    const result = await createDocument(userId, {
+    const result = await createNewDocument(userId, {
       title,
       docType,
     });
     return sendResponse(res, StatusCodes.CREATED, {
-      data: result,
-      message: "Document Created",
+      data: result.document,
+      message: result.message,
     });
   },
 );

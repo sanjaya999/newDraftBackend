@@ -1,26 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getUserNotifications } from "../api/notification.controller.js";
-import { prisma } from "../infrastructure/database.js";
+import * as notificationService from "../services/notification.service.js";
+import { StatusCodes } from "http-status-codes";
 
-vi.mock("../infrastructure/database.js", () => ({
-  prisma: {
-    notification: {
-      create: vi.fn(),
-      findMany: vi.fn(),
-    },
-  },
-}));
-
-vi.mock("../sockets/socket.server.js", () => ({
-  getIO: vi.fn(),
-  userSocketMap: {
-    get: vi.fn(),
-  },
+vi.mock("../services/notification.service.js", () => ({
+  getUserNotifications: vi.fn(),
 }));
 
 describe("Notification Controller", () => {
   let req: any;
   let res: any;
+  let next: any;
 
   beforeEach(() => {
     req = {
@@ -30,6 +20,7 @@ describe("Notification Controller", () => {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
+    next = vi.fn();
     vi.clearAllMocks();
   });
 
@@ -38,20 +29,19 @@ describe("Notification Controller", () => {
       const mockNotifications = [
         { id: "notif-1", message: "Test message", recipientId: "user-123" },
       ];
-      (prisma.notification.findMany as any).mockResolvedValue(
+      (notificationService.getUserNotifications as any).mockResolvedValue(
         mockNotifications,
       );
 
-      await getUserNotifications(req, res);
+      await getUserNotifications(req, res, next);
 
-      expect(prisma.notification.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { recipientId: "user-123" },
-        }),
+      expect(notificationService.getUserNotifications).toHaveBeenCalledWith(
+        "user-123",
       );
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
+        message: "Notifications fetched successfully",
         data: mockNotifications,
       });
     });

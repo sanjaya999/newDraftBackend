@@ -1,48 +1,21 @@
-import { getIO } from "../sockets/socket.server.js";
-import { prisma } from "../infrastructure/database.js";
-import { userSocketMap } from "../sockets/socket.server.js";
+import type { Request, Response } from "express";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { getUserNotifications as getNotificationsService } from "../services/notification.service.js";
+import { sendResponse } from "../utils/response.js";
+import { StatusCodes } from "http-status-codes";
 
-export const notificationController = async (
-  recipientId: string,
-  message: string,
-  documentId: string,
-  actorId: string,
-) => {
-  const notification = await prisma.notification.create({
-    data: {
-      recipientId,
-      message: message,
-      documentId,
-      actorId,
-      type: "DOCUMENT_SHARED",
-    },
-    include: { actor: true, document: true },
-  });
+/**
+ * HTTP handler for fetching user notifications.
+ * Delegates to notification service layer.
+ */
+export const getUserNotifications = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+    const notifications = await getNotificationsService(userId);
 
-  const socketId = userSocketMap.get(recipientId);
-  if (socketId) {
-    getIO().to(socketId).emit("notification:new", notification);
-  }
-};
-
-export const getUserNotifications = async (req: any, res: any) => {
-  const userId = req.user.id;
-  const notifications = await prisma.notification.findMany({
-    where: {
-      recipientId: userId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 20,
-    include: {
-      actor: true,
-      document: true,
-    },
-  });
-
-  res.status(200).json({
-    success: true,
-    data: notifications,
-  });
-};
+    return sendResponse(res, StatusCodes.OK, {
+      data: notifications,
+      message: "Notifications fetched successfully",
+    });
+  },
+);

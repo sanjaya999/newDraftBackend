@@ -15,7 +15,7 @@ import { ApiError } from "../core/ApiError.js";
 import { StatusCodes } from "http-status-codes";
 import type { Document, DocumentRole } from "@prisma/client";
 import { findUserByEmail } from "../repository/user.repository.js";
-import { notificationController } from "../api/notification.controller.js";
+import { notifyCollaboratorAdded } from "./notification.service.js";
 
 export async function createNewDocument(
   ownerId: string,
@@ -101,10 +101,11 @@ export async function addCollaborator(
 
   const permissions = await upsertDocumentPermission(documentId, user.id, role);
 
-  await notificationController(
+  await notifyCollaboratorAdded(
     user.id,
-    `You have been added as a ${role} to "${document.title}"`,
     documentId,
+    document.title,
+    role,
     requesterId,
   );
 

@@ -110,3 +110,24 @@ export async function deleteDocumentPermission(permissionId: string) {
     where: { id: permissionId },
   });
 }
+
+export async function findDocumentOwner(
+  documentId: string,
+): Promise<{ ownerId: string } | null> {
+  return prisma.document.findUnique({
+    where: { id: documentId },
+    select: { ownerId: true },
+  });
+}
+
+export async function findUserDocumentPermission(
+  userId: string,
+  documentId: string,
+) {
+  return prisma.documentPermission.findUnique({
+    where: {
+      userId_documentId: { userId, documentId },
+    },
+    select: { role: true },
+  });
+}
