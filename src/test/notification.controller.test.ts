@@ -43,11 +43,15 @@ describe("Notification Controller", () => {
         mockNotifications,
       );
 
-      await getUserNotifications(req, res, () => {});
+      const next = vi.fn();
+      await getUserNotifications(req, res, next);
+      if (next.mock.calls.length > 0) {
+        console.error("Controller Error:", next.mock.calls[0][0]);
+      }
 
       expect(prisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { recipientId: "user-123" },
+          where: { recipientId: "user-123", isRead: false },
         }),
       );
       expect(res.status).toHaveBeenCalledWith(200);
