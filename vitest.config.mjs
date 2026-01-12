@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     setupFiles: ["./vitest.setup.js"],
+    exclude: ["node_modules", "dist", ".idea", ".git", ".cache"],
   },
   resolve: {
     alias: {

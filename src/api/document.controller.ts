@@ -39,7 +39,7 @@ export class DocumentController {
 
   getById = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const id = req.params.id!;
+    const id = req.params.id as string;
 
     const result = await this.documentService.getById(id, userId);
     return sendResponse(res, StatusCodes.OK, {
@@ -50,7 +50,7 @@ export class DocumentController {
 
   addCollaborator = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const documentId = req.params.docID!;
+    const documentId = req.params.docID as string;
     const { email, role } = req.body;
 
     const result = await this.documentService.addCollaborator(
