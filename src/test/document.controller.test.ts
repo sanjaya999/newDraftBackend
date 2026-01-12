@@ -1,4 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { StatusCodes } from "http-status-codes";
+
+// Mock all dependencies before importing the controller
+vi.mock("../repository/document.repository.js", () => ({
+  createDocument: vi.fn(),
+  findDocumentById: vi.fn(),
+  findDocument: vi.fn(),
+  updateDocument: vi.fn(),
+  getDocumentCollaborators: vi.fn(),
+  getCollaborationDocument: vi.fn(),
+  upsertDocumentPermission: vi.fn(),
+  DocumentRepository: vi.fn(),
+  documentSelectPublic: {},
+}));
+
+vi.mock("../services/docs.js", () => ({
+  getAllDocument: vi.fn(),
+  getDocumentById: vi.fn(),
+  addCollaborator: vi.fn(),
+  updateDocumentService: vi.fn(),
+  getAllCollaborationDocument: vi.fn(),
+  getDocumentCollaboratorsService: vi.fn(),
+  createNewDocument: vi.fn(),
+  DocumentService: vi.fn(),
+}));
+
+// Import after mocks are set up
 import {
   createDocumentController,
   getAllDocumentController,
@@ -10,21 +37,6 @@ import {
 } from "../api/document.controller.js";
 import * as docRepository from "../repository/document.repository.js";
 import * as docService from "../services/docs.js";
-import { StatusCodes } from "http-status-codes";
-
-vi.mock("../repository/document.repository.js", () => ({
-  createDocument: vi.fn(),
-  upsertDocumentPermission: vi.fn(),
-}));
-
-vi.mock("../services/docs.js", () => ({
-  addCollaborator: vi.fn(),
-  getDocumentById: vi.fn(),
-  updateDocumentService: vi.fn(),
-  getAllDocument: vi.fn(),
-  getAllCollaborationDocument: vi.fn(),
-  getDocumentCollaboratorsService: vi.fn(),
-}));
 
 describe("Document Controller", () => {
   let req: any;
@@ -85,7 +97,7 @@ describe("Document Controller", () => {
 
   describe("getDocumentController", () => {
     it("should fetch a document by ID", async () => {
-      const mockDoc = { id: "doc-1", title: "Doc 1" };
+      const mockDoc = { id: "doc-1", title: "Doc 1", ownerId: "user-123" };
       req.params.id = "doc-1";
       (docService.getDocumentById as any).mockResolvedValue({
         document: mockDoc,
@@ -93,10 +105,7 @@ describe("Document Controller", () => {
 
       await getDocumentController(req, res, () => {});
 
-      expect(docService.getDocumentById).toHaveBeenCalledWith(
-        "doc-1",
-        "user-123",
-      );
+      expect(docService.getDocumentById).toHaveBeenCalledWith("doc-1", "user-123");
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -113,10 +122,12 @@ describe("Document Controller", () => {
           id: "user-456",
           email: "test@test.com",
           role: "EDITOR",
+          permissionId: "perm-1",
         },
       };
       req.params.docID = "doc-1";
       req.body = { email: "test@test.com", role: "EDITOR" };
+
       (docService.addCollaborator as any).mockResolvedValue(mockResult);
 
       await addCollaboratorController(req, res, () => {});
@@ -125,7 +136,7 @@ describe("Document Controller", () => {
         "doc-1",
         "user-123",
         "test@test.com",
-        "EDITOR",
+        "EDITOR"
       );
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
@@ -141,21 +152,22 @@ describe("Document Controller", () => {
       const mockDoc = { id: "doc-1", title: "Updated Title" };
       req.params.docID = "doc-1";
       req.body = { title: "Updated Title" };
+
       (docService.updateDocumentService as any).mockResolvedValue({
         document: mockDoc,
-        message: "Updated",
+        message: "Document updated successfully",
       });
 
       await updateDocumentController(req, res, () => {});
 
       expect(docService.updateDocumentService).toHaveBeenCalledWith(
         { title: "Updated Title" },
-        "doc-1",
+        "doc-1"
       );
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: "Updated",
+        message: "Document updated successfully",
         data: mockDoc,
       });
     });
@@ -163,16 +175,14 @@ describe("Document Controller", () => {
 
   describe("getAllCollaborationDocumentController", () => {
     it("should fetch collaboration documents", async () => {
-      const mockDocs = [{ id: "doc-2", title: "Shared Doc" }];
+      const mockDocs = [{ document: { id: "doc-2", title: "Shared Doc" } }];
       (docService.getAllCollaborationDocument as any).mockResolvedValue({
         documents: mockDocs,
       });
 
       await getAllCollaborationDocumentController(req, res, () => {});
 
-      expect(docService.getAllCollaborationDocument).toHaveBeenCalledWith(
-        "user-123",
-      );
+      expect(docService.getAllCollaborationDocument).toHaveBeenCalledWith("user-123");
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -184,7 +194,9 @@ describe("Document Controller", () => {
 
   describe("getAllCollaborators", () => {
     it("should fetch all collaborators for a document", async () => {
-      const mockCollabs = [{ id: "user-456", email: "test@test.com" }];
+      const mockCollabs = [
+        { userId: "user-456", user: { id: "user-456", email: "test@test.com", name: "Test" } },
+      ];
       req.params.docID = "doc-1";
       (docService.getDocumentCollaboratorsService as any).mockResolvedValue({
         collaborators: mockCollabs,
@@ -192,9 +204,7 @@ describe("Document Controller", () => {
 
       await getAllCollaborators(req, res, () => {});
 
-      expect(docService.getDocumentCollaboratorsService).toHaveBeenCalledWith(
-        "doc-1",
-      );
+      expect(docService.getDocumentCollaboratorsService).toHaveBeenCalledWith("doc-1");
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: true,

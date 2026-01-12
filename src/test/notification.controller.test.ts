@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getUserNotifications } from "../api/notification.controller.js";
-import { prisma } from "../infrastructure/database.js";
 
 vi.mock("../infrastructure/database.js", () => ({
   prisma: {
@@ -17,6 +15,9 @@ vi.mock("../sockets/socket.server.js", () => ({
     get: vi.fn(),
   },
 }));
+
+import { getUserNotifications } from "../api/notification.controller.js";
+import { prisma } from "../infrastructure/database.js";
 
 describe("Notification Controller", () => {
   let req: any;
@@ -39,19 +40,20 @@ describe("Notification Controller", () => {
         { id: "notif-1", message: "Test message", recipientId: "user-123" },
       ];
       (prisma.notification.findMany as any).mockResolvedValue(
-        mockNotifications,
+        mockNotifications
       );
 
-      await getUserNotifications(req, res);
+      await getUserNotifications(req, res, () => {});
 
       expect(prisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { recipientId: "user-123" },
-        }),
+        })
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
+        message: "Notifications fetched successfully",
         data: mockNotifications,
       });
     });
