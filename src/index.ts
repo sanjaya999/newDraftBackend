@@ -4,15 +4,19 @@ import { env } from "./infrastructure/envConfig.js";
 import helmet from "helmet";
 import { logger } from "./infrastructure/logger.js";
 import { prisma } from "./infrastructure/database.js";
-import authRouter from "./routes/auth.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
-import documentRouter from "./routes/docs.route.js";
-import notificationRouter from "./routes/notification.route.js";
 import { initCollabServer } from "./sockets/socket.server.js";
 import { createServer } from "http";
 import { startPersistence } from "./utils/document.manager.js";
-import { persistCustomDocument } from "./utils/crdt.manager.js";
 import { globalLimiter } from "./utils/rateLimiter.js";
+
+// Import DI container and bootstrap
+import { bootstrapContainer } from "./infrastructure/container.js";
+
+// Import route factories
+import { createAuthRouter } from "./routes/auth.route.js";
+import { createDocumentRouter } from "./routes/docs.route.js";
+import { createNotificationRouter } from "./routes/notification.route.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -37,10 +41,7 @@ app.use(
 
 app.use(globalLimiter);
 
-app.use("/auth", authRouter);
-app.use("/docs", documentRouter);
-app.use("/notifications", notificationRouter);
-
+// Health check (before DI bootstrap)
 app.get("/health", (req, res) => {
   res.status(200).json({ ok: true });
 });
@@ -58,8 +59,18 @@ const startServer = async () => {
     await prisma.$connect();
     logger.info("Connected to the database successfully.");
 
+    // Bootstrap DI container after database connection
+    bootstrapContainer(prisma);
+    logger.info("Dependency injection container initialized.");
+
+    // Register routes using DI-injected controllers
+    app.use("/auth", createAuthRouter());
+    app.use("/docs", createDocumentRouter());
+    app.use("/notifications", createNotificationRouter());
+    logger.info("Routes registered with DI controllers.");
+
     const io = initCollabServer(httpServer);
-    logger.info("socket.io server initilized");
+    logger.info("socket.io server initialized");
 
     httpServer.listen(env.PORT, () => {
       logger.info(`Server is running on http://localhost:${env.PORT}`);
@@ -71,6 +82,8 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
 startServer();
 startPersistence();
+
 export { httpServer, app };

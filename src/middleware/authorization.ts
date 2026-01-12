@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import type { DocumentRole } from "@prisma/client";
 import { PERMISSIONS, type PermissionAction } from "../types/permissions.js";
 import { checkDocumentPermission } from "../services/permissionService.js";
 import { ApiError } from "../core/ApiError.js";
@@ -10,15 +11,15 @@ export const authorize = (requiredPermission: PermissionAction) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id;
-      const documentId = req.params.docID || req.body.documentId;
+      const documentId = String(req.params.docID || req.body.documentId);
 
       const role = await checkDocumentPermission(
         userId,
         documentId,
-        requiredPermission,
+        requiredPermission as string,
       );
 
-      req.userRole = role;
+      req.userRole = role as DocumentRole;
       req.documentId = documentId;
       next();
     } catch (error) {
