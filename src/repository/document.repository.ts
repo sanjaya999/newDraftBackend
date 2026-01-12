@@ -33,7 +33,7 @@ export class DocumentRepository implements IDocumentRepository {
 
   async create(
     ownerId: string,
-    input: CreateDocumentInput
+    input: CreateDocumentInput,
   ): Promise<PublicDocument> {
     return this.prisma.document.create({
       data: {
@@ -59,7 +59,10 @@ export class DocumentRepository implements IDocumentRepository {
     });
   }
 
-  async update(id: string, input: UpdateDocumentInput): Promise<PublicDocument> {
+  async update(
+    id: string,
+    input: UpdateDocumentInput,
+  ): Promise<PublicDocument> {
     return this.prisma.document.update({
       where: { id },
       data: {
@@ -80,7 +83,7 @@ export class DocumentRepository implements IDocumentRepository {
   async upsertPermission(
     documentId: string,
     userId: string,
-    role: DocumentRole
+    role: DocumentRole,
   ): Promise<{ id: string; role: DocumentRole }> {
     return this.prisma.documentPermission.upsert({
       where: { userId_documentId: { userId, documentId } },
@@ -125,19 +128,19 @@ const defaultRepository = new DocumentRepository(prisma);
 
 export async function createDocument(
   ownerId: string,
-  createDocumentInput: CreateDocumentInput
+  createDocumentInput: CreateDocumentInput,
 ): Promise<PublicDocument> {
   return defaultRepository.create(ownerId, createDocumentInput);
 }
 
 export async function findDocumentById(
-  id: string
+  id: string,
 ): Promise<PublicDocument | null> {
   return defaultRepository.findById(id);
 }
 
 export async function findDocument(
-  id: string
+  id: string,
 ): Promise<PublicDocument[] | null> {
   return defaultRepository.findByOwnerId(id);
 }
@@ -157,7 +160,7 @@ export async function findUserByEmail(email: string) {
 export async function upsertDocumentPermission(
   documentId: string,
   userId: string,
-  role: DocumentRole
+  role: DocumentRole,
 ) {
   return defaultRepository.upsertPermission(documentId, userId, role);
 }

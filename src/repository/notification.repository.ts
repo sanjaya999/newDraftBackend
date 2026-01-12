@@ -13,7 +13,7 @@ export class NotificationRepository implements INotificationRepository {
     message: string,
     documentId: string,
     actorId: string,
-    type: string = "DOCUMENT_SHARED"
+    type: string = "DOCUMENT_SHARED",
   ): Promise<void> {
     await this.prisma.notification.create({
       data: {
@@ -64,21 +64,21 @@ export async function createNotification(
   recipientId: string,
   message: string,
   documentId: string,
-  actorId: string
+  actorId: string,
 ): Promise<void> {
   return defaultRepository.create(recipientId, message, documentId, actorId);
 }
 
 export async function findUnreadNotifications(
   recipientId: string,
-  limit: number = 10
+  limit: number = 10,
 ) {
   return defaultRepository.findUnreadByRecipient(recipientId, limit);
 }
 
 export async function markNotificationAsRead(
   notificationId: string,
-  recipientId: string
+  recipientId: string,
 ): Promise<void> {
   return defaultRepository.markAsRead(notificationId, recipientId);
 }

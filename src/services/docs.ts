@@ -16,19 +16,19 @@ import type {
 /**
  * DocumentService handles document business logic.
  * Implements IDocumentService interface for dependency injection.
- * 
+ *
  * Follows Single Responsibility Principle: only handles document logic.
  * Follows Dependency Inversion Principle: depends on abstractions.
  */
 export class DocumentService implements IDocumentService {
   constructor(
     private readonly documentRepository: IDocumentRepository,
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
   ) {}
 
   async create(
     ownerId: string,
-    input: CreateDocumentInput
+    input: CreateDocumentInput,
   ): Promise<ServiceResult<any>> {
     const document = await this.documentRepository.create(ownerId, input);
     return {
@@ -37,10 +37,7 @@ export class DocumentService implements IDocumentService {
     };
   }
 
-  async getById(
-    id: string,
-    userId: string
-  ): Promise<ServiceResult<any>> {
+  async getById(id: string, userId: string): Promise<ServiceResult<any>> {
     const document = await this.documentRepository.findById(id);
 
     if (!document) {
@@ -49,12 +46,14 @@ export class DocumentService implements IDocumentService {
 
     if (document.ownerId !== userId) {
       const collaborators = await this.documentRepository.getCollaborators(id);
-      const hasAccess = collaborators.some((collab) => collab.userId === userId);
+      const hasAccess = collaborators.some(
+        (collab) => collab.userId === userId,
+      );
 
       if (!hasAccess) {
         throw new ApiError(
           "You don't have access to this document",
-          StatusCodes.FORBIDDEN
+          StatusCodes.FORBIDDEN,
         );
       }
     }
@@ -70,21 +69,31 @@ export class DocumentService implements IDocumentService {
     return { data: documents, message: "Documents fetched successfully" };
   }
 
-  async getAllCollaborationDocuments(userId: string): Promise<ServiceResult<any>> {
-    const documents = await this.documentRepository.getCollaborationDocuments(userId);
-    return { data: documents, message: "Collaboration documents fetched successfully" };
+  async getAllCollaborationDocuments(
+    userId: string,
+  ): Promise<ServiceResult<any>> {
+    const documents =
+      await this.documentRepository.getCollaborationDocuments(userId);
+    return {
+      data: documents,
+      message: "Collaboration documents fetched successfully",
+    };
   }
 
   async getCollaborators(documentId: string): Promise<ServiceResult<any>> {
-    const collaborators = await this.documentRepository.getCollaborators(documentId);
-    return { data: collaborators, message: "Collaborators fetched successfully" };
+    const collaborators =
+      await this.documentRepository.getCollaborators(documentId);
+    return {
+      data: collaborators,
+      message: "Collaborators fetched successfully",
+    };
   }
 
   async addCollaborator(
     documentId: string,
     requesterId: string,
     email: string,
-    role: DocumentRole
+    role: DocumentRole,
   ): Promise<ServiceResult<CollaboratorResult>> {
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
@@ -94,7 +103,7 @@ export class DocumentService implements IDocumentService {
     if (document.ownerId !== requesterId) {
       throw new ApiError(
         "Only the owner can add collaborators",
-        StatusCodes.FORBIDDEN
+        StatusCodes.FORBIDDEN,
       );
     }
 
@@ -102,28 +111,28 @@ export class DocumentService implements IDocumentService {
     if (!user) {
       throw new ApiError(
         "User with this email does not exist",
-        StatusCodes.NOT_FOUND
+        StatusCodes.NOT_FOUND,
       );
     }
 
     if (user.id === document.ownerId) {
       throw new ApiError(
         "Owner cannot be added as collaborator",
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
     }
 
     const permissions = await this.documentRepository.upsertPermission(
       documentId,
       user.id,
-      role
+      role,
     );
 
     await this.notificationService.send(
       user.id,
       `You have been added as a ${role} to "${document.title}"`,
       documentId,
-      requesterId
+      requesterId,
     );
 
     return {
@@ -139,7 +148,7 @@ export class DocumentService implements IDocumentService {
 
   async update(
     id: string,
-    input: UpdateDocumentInput
+    input: UpdateDocumentInput,
   ): Promise<ServiceResult<any>> {
     const document = await this.documentRepository.findById(id);
     if (!document) {
@@ -171,9 +180,12 @@ import { notificationController } from "../api/notification.controller.js";
 const compatDocRepo = {
   create: createDocument,
   findById: findDocumentById,
-  findByOwnerId: (ownerId: string) => findDocument(ownerId).then(docs => docs || []),
+  findByOwnerId: (ownerId: string) =>
+    findDocument(ownerId).then((docs) => docs || []),
   update: updateDocument,
-  delete: async (id: string) => { throw new Error("Not implemented"); },
+  delete: async (id: string) => {
+    throw new Error("Not implemented");
+  },
   findUserByEmail,
   upsertPermission: upsertDocumentPermission,
   getCollaborators: getDocumentCollaborators,
@@ -187,14 +199,17 @@ const compatNotificationService = {
 
 const defaultDocumentService = new DocumentService(
   compatDocRepo as any,
-  compatNotificationService
+  compatNotificationService,
 );
 
 export async function createNewDocument(
   ownerId: string,
-  createDocumentInput: CreateDocumentInput
+  createDocumentInput: CreateDocumentInput,
 ) {
-  const result = await defaultDocumentService.create(ownerId, createDocumentInput);
+  const result = await defaultDocumentService.create(
+    ownerId,
+    createDocumentInput,
+  );
   return { document: result.data, message: result.message };
 }
 
@@ -209,7 +224,8 @@ export async function getDocumentCollaboratorsService(id: string) {
 }
 
 export async function getAllCollaborationDocument(userId: string) {
-  const result = await defaultDocumentService.getAllCollaborationDocuments(userId);
+  const result =
+    await defaultDocumentService.getAllCollaborationDocuments(userId);
   return { documents: result.data };
 }
 
@@ -222,20 +238,20 @@ export async function addCollaborator(
   documentId: string,
   requesterId: string,
   email: string,
-  role: DocumentRole
+  role: DocumentRole,
 ) {
   const result = await defaultDocumentService.addCollaborator(
     documentId,
     requesterId,
     email,
-    role
+    role,
   );
   return { collaborator: result.data };
 }
 
 export async function updateDocumentService(
   input: UpdateDocumentInput,
-  docsId: string
+  docsId: string,
 ) {
   const result = await defaultDocumentService.update(docsId, input);
   return { document: result.data, message: result.message };

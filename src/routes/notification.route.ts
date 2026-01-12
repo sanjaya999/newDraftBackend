@@ -8,7 +8,9 @@ import type { NotificationController } from "../api/notification.controller.js";
  * Follows Dependency Inversion Principle.
  */
 export function createNotificationRouter(): Router {
-  const notificationController = container.get<NotificationController>(DEPS.NOTIFICATION_CONTROLLER);
+  const notificationController = container.get<NotificationController>(
+    DEPS.NOTIFICATION_CONTROLLER,
+  );
   const router = Router();
 
   router.get("/", authenticate, notificationController.getAll);
@@ -22,7 +24,9 @@ const notificationRouter = Router();
 let initialized = false;
 notificationRouter.use((req, res, next) => {
   if (!initialized) {
-    const controller = container.get<NotificationController>(DEPS.NOTIFICATION_CONTROLLER);
+    const controller = container.get<NotificationController>(
+      DEPS.NOTIFICATION_CONTROLLER,
+    );
     notificationRouter.get("/", authenticate, controller.getAll);
     initialized = true;
   }

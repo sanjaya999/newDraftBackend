@@ -19,9 +19,13 @@ export class TokenService implements ITokenService {
 
   generateRefreshToken(userId: string): string {
     if (!env.JWT_REFRESH_SECRET) {
-      throw new Error("JWT_REFRESH_KEY is not defined in environment variables");
+      throw new Error(
+        "JWT_REFRESH_KEY is not defined in environment variables",
+      );
     }
-    return jwt.sign({ id: userId }, env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    return jwt.sign({ id: userId }, env.JWT_REFRESH_SECRET, {
+      expiresIn: "7d",
+    });
   }
 
   async hashPassword(password: string): Promise<string> {
@@ -30,7 +34,7 @@ export class TokenService implements ITokenService {
 
   async comparePassword(
     password: string,
-    hashedPassword: string
+    hashedPassword: string,
   ): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
@@ -43,7 +47,7 @@ export const hashPassword = async (password: string): Promise<string> => {
 
 export const comparePassword = async (
   password: string,
-  hashedPassword: string
+  hashedPassword: string,
 ): Promise<boolean> => {
   return bcrypt.compare(password, hashedPassword);
 };

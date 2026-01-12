@@ -1,6 +1,6 @@
 /**
  * Dependency Injection Container and Bootstrap
- * 
+ *
  * This module initializes all dependencies and wires them together.
  * Following Dependency Inversion Principle - high-level modules depend on abstractions.
  */
@@ -59,7 +59,9 @@ export class Container {
   get<T>(key: string): T {
     const registration = this.registrations.get(key);
     if (!registration) {
-      throw new Error(`Dependency '${key}' is not registered in the container.`);
+      throw new Error(
+        `Dependency '${key}' is not registered in the container.`,
+      );
     }
 
     if (registration.singleton) {
@@ -124,65 +126,67 @@ export function bootstrapContainer(prismaClient: PrismaClient = prisma): void {
   // Repositories
   container.registerSingleton<IUserRepository>(
     DEPS.USER_REPOSITORY,
-    () => new UserRepository(container.get(DEPS.PRISMA))
+    () => new UserRepository(container.get(DEPS.PRISMA)),
   );
 
   container.registerSingleton<IDocumentRepository>(
     DEPS.DOCUMENT_REPOSITORY,
-    () => new DocumentRepository(container.get(DEPS.PRISMA))
+    () => new DocumentRepository(container.get(DEPS.PRISMA)),
   );
 
   container.registerSingleton<INotificationRepository>(
     DEPS.NOTIFICATION_REPOSITORY,
-    () => new NotificationRepository(container.get(DEPS.PRISMA))
+    () => new NotificationRepository(container.get(DEPS.PRISMA)),
   );
 
   // Services
   container.registerSingleton<ITokenService>(
     DEPS.TOKEN_SERVICE,
-    () => new TokenService()
+    () => new TokenService(),
   );
 
   container.registerSingleton<IAuthService>(
     DEPS.AUTH_SERVICE,
-    () => new AuthService(
-      container.get(DEPS.USER_REPOSITORY),
-      container.get(DEPS.TOKEN_SERVICE)
-    )
+    () =>
+      new AuthService(
+        container.get(DEPS.USER_REPOSITORY),
+        container.get(DEPS.TOKEN_SERVICE),
+      ),
   );
 
   container.registerSingleton<INotificationService>(
     DEPS.NOTIFICATION_SERVICE,
-    () => new NotificationService(container.get(DEPS.NOTIFICATION_REPOSITORY))
+    () => new NotificationService(container.get(DEPS.NOTIFICATION_REPOSITORY)),
   );
 
   container.registerSingleton<IDocumentService>(
     DEPS.DOCUMENT_SERVICE,
-    () => new DocumentService(
-      container.get(DEPS.DOCUMENT_REPOSITORY),
-      container.get(DEPS.NOTIFICATION_SERVICE)
-    )
+    () =>
+      new DocumentService(
+        container.get(DEPS.DOCUMENT_REPOSITORY),
+        container.get(DEPS.NOTIFICATION_SERVICE),
+      ),
   );
 
   container.registerSingleton<IPermissionService>(
     DEPS.PERMISSION_SERVICE,
-    () => new PermissionService(container.get(DEPS.PRISMA))
+    () => new PermissionService(container.get(DEPS.PRISMA)),
   );
 
   // Controllers
   container.registerSingleton(
     DEPS.AUTH_CONTROLLER,
-    () => new AuthController(container.get(DEPS.AUTH_SERVICE))
+    () => new AuthController(container.get(DEPS.AUTH_SERVICE)),
   );
 
   container.registerSingleton(
     DEPS.DOCUMENT_CONTROLLER,
-    () => new DocumentController(container.get(DEPS.DOCUMENT_SERVICE))
+    () => new DocumentController(container.get(DEPS.DOCUMENT_SERVICE)),
   );
 
   container.registerSingleton(
     DEPS.NOTIFICATION_CONTROLLER,
-    () => new NotificationController(container.get(DEPS.PRISMA))
+    () => new NotificationController(container.get(DEPS.PRISMA)),
   );
 }
 

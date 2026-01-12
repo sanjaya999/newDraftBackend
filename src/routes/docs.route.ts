@@ -16,7 +16,9 @@ import type { DocumentController } from "../api/document.controller.js";
  * Follows Dependency Inversion Principle.
  */
 export function createDocumentRouter(): Router {
-  const docController = container.get<DocumentController>(DEPS.DOCUMENT_CONTROLLER);
+  const docController = container.get<DocumentController>(
+    DEPS.DOCUMENT_CONTROLLER,
+  );
   const router = Router();
 
   router.use(authenticate);
@@ -26,7 +28,7 @@ export function createDocumentRouter(): Router {
   router.get(
     "/collaborators/:docID",
     authorize("READ_DOCUMENT"),
-    docController.getCollaborators
+    docController.getCollaborators,
   );
   router.get("/:id", validate(getDocumentSchema), docController.getById);
   router.get("/", docController.getAll);
@@ -34,13 +36,13 @@ export function createDocumentRouter(): Router {
     "/addCol/:docID",
     validate(shareDocumentSchema),
     authorize("ADD_COLLABORATOR"),
-    docController.addCollaborator
+    docController.addCollaborator,
   );
   router.put(
     "/upDocs/:docID",
     validate(updateDocumentSchema),
     authorize("UPDATE_DOCUMENT"),
-    docController.update
+    docController.update,
   );
 
   return router;
@@ -53,13 +55,15 @@ documentRouter.use(authenticate);
 let initialized = false;
 documentRouter.use((req, res, next) => {
   if (!initialized) {
-    const controller = container.get<DocumentController>(DEPS.DOCUMENT_CONTROLLER);
+    const controller = container.get<DocumentController>(
+      DEPS.DOCUMENT_CONTROLLER,
+    );
     documentRouter.post("/", controller.create);
     documentRouter.get("/collaboration", controller.getAllCollaboration);
     documentRouter.get(
       "/collaborators/:docID",
       authorize("READ_DOCUMENT"),
-      controller.getCollaborators
+      controller.getCollaborators,
     );
     documentRouter.get("/:id", validate(getDocumentSchema), controller.getById);
     documentRouter.get("/", controller.getAll);
@@ -67,13 +71,13 @@ documentRouter.use((req, res, next) => {
       "/addCol/:docID",
       validate(shareDocumentSchema),
       authorize("ADD_COLLABORATOR"),
-      controller.addCollaborator
+      controller.addCollaborator,
     );
     documentRouter.put(
       "/upDocs/:docID",
       validate(updateDocumentSchema),
       authorize("UPDATE_DOCUMENT"),
-      controller.update
+      controller.update,
     );
     initialized = true;
   }

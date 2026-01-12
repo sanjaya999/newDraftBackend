@@ -48,7 +48,7 @@ export interface IUserRepository {
   create(
     name: string,
     email: string,
-    passwordHash: string
+    passwordHash: string,
   ): Promise<UserWithoutPassword>;
 }
 
@@ -58,7 +58,10 @@ export interface IUserRepository {
  * different subsets of Document data (PublicDocument, full Document, etc.)
  */
 export interface IDocumentRepository {
-  create(ownerId: string, input: CreateDocumentInput): Promise<PublicDocumentData>;
+  create(
+    ownerId: string,
+    input: CreateDocumentInput,
+  ): Promise<PublicDocumentData>;
   findById(id: string): Promise<PublicDocumentData | null>;
   findByOwnerId(ownerId: string): Promise<PublicDocumentData[]>;
   update(id: string, input: UpdateDocumentInput): Promise<PublicDocumentData>;
@@ -67,7 +70,7 @@ export interface IDocumentRepository {
   upsertPermission(
     documentId: string,
     userId: string,
-    role: DocumentRole
+    role: DocumentRole,
   ): Promise<{ id: string; role: DocumentRole }>;
   getCollaborators(documentId: string): Promise<
     Array<{
@@ -90,7 +93,7 @@ export interface INotificationRepository {
     message: string,
     documentId: string,
     actorId: string,
-    type?: string
+    type?: string,
   ): Promise<void>;
   findUnreadByRecipient(recipientId: string, limit: number): Promise<unknown[]>;
   markAsRead(notificationId: string, recipientId: string): Promise<void>;
@@ -101,23 +104,26 @@ export interface INotificationRepository {
 // ============================================================================
 
 export interface IAuthService {
-  register(
-    name: string,
-    email: string,
-    password: string
-  ): Promise<AuthResult>;
+  register(name: string, email: string, password: string): Promise<AuthResult>;
   login(email: string, password: string): Promise<AuthResult>;
 }
 
 export interface IDocumentService {
   create(
     ownerId: string,
-    input: CreateDocumentInput
+    input: CreateDocumentInput,
   ): Promise<ServiceResult<PublicDocumentData>>;
-  getById(id: string, userId: string): Promise<ServiceResult<PublicDocumentData>>;
+  getById(
+    id: string,
+    userId: string,
+  ): Promise<ServiceResult<PublicDocumentData>>;
   getAll(userId: string): Promise<ServiceResult<PublicDocumentData[]>>;
-  getAllCollaborationDocuments(userId: string): Promise<
-    ServiceResult<Array<{ document: { id: string; title: string; docType: string } }>>
+  getAllCollaborationDocuments(
+    userId: string,
+  ): Promise<
+    ServiceResult<
+      Array<{ document: { id: string; title: string; docType: string } }>
+    >
   >;
   getCollaborators(documentId: string): Promise<
     ServiceResult<
@@ -132,11 +138,11 @@ export interface IDocumentService {
     documentId: string,
     requesterId: string,
     email: string,
-    role: DocumentRole
+    role: DocumentRole,
   ): Promise<ServiceResult<CollaboratorResult>>;
   update(
     id: string,
-    input: UpdateDocumentInput
+    input: UpdateDocumentInput,
   ): Promise<ServiceResult<PublicDocumentData>>;
 }
 
@@ -144,7 +150,7 @@ export interface IPermissionService {
   checkDocumentPermission(
     userId: string,
     documentId: string,
-    requiredPermission: string
+    requiredPermission: string,
   ): Promise<string>;
 }
 
@@ -153,7 +159,7 @@ export interface INotificationService {
     recipientId: string,
     message: string,
     documentId: string,
-    actorId: string
+    actorId: string,
   ): Promise<void>;
 }
 

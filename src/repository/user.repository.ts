@@ -1,5 +1,8 @@
 import type { User, Prisma, PrismaClient } from "@prisma/client";
-import type { IUserRepository, UserWithoutPassword } from "../interfaces/index.js";
+import type {
+  IUserRepository,
+  UserWithoutPassword,
+} from "../interfaces/index.js";
 
 export const userSelectWithoutPassword = {
   id: true,
@@ -32,7 +35,7 @@ export class UserRepository implements IUserRepository {
   async create(
     name: string,
     email: string,
-    passwordHash: string
+    passwordHash: string,
   ): Promise<UserWithoutPassword> {
     return this.prisma.user.create({
       data: {
@@ -57,7 +60,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function findUserById(
-  id: string
+  id: string,
 ): Promise<UserWithoutPassword | null> {
   return defaultRepository.findById(id);
 }
@@ -65,7 +68,7 @@ export async function findUserById(
 export async function createUser(
   name: string,
   email: string,
-  passwordHash: string
+  passwordHash: string,
 ): Promise<UserWithoutPassword> {
   return defaultRepository.create(name, email, passwordHash);
 }

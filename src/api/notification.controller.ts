@@ -21,7 +21,7 @@ export class NotificationController {
     recipientId: string,
     message: string,
     documentId: string,
-    actorId: string
+    actorId: string,
   ): Promise<void> {
     const notification = await this.prisma.notification.create({
       data: {
@@ -71,7 +71,8 @@ export const notificationController = (
   recipientId: string,
   message: string,
   documentId: string,
-  actorId: string
-) => defaultNotificationController.send(recipientId, message, documentId, actorId);
+  actorId: string,
+) =>
+  defaultNotificationController.send(recipientId, message, documentId, actorId);
 
 export const getUserNotifications = defaultNotificationController.getAll;

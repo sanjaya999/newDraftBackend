@@ -10,20 +10,20 @@ import type {
 /**
  * AuthService handles authentication business logic.
  * Implements IAuthService interface for dependency injection.
- * 
+ *
  * Follows Single Responsibility Principle: only handles auth logic.
  * Follows Dependency Inversion Principle: depends on abstractions.
  */
 export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly tokenService: ITokenService
+    private readonly tokenService: ITokenService,
   ) {}
 
   async register(
     name: string,
     email: string,
-    password: string
+    password: string,
   ): Promise<AuthResult> {
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
@@ -51,7 +51,7 @@ export class AuthService implements IAuthService {
 
     const isPasswordValid = await this.tokenService.comparePassword(
       password,
-      user.password
+      user.password,
     );
 
     if (!isPasswordValid) {
@@ -98,13 +98,13 @@ const compatUserRepository = {
 
 const defaultAuthService = new AuthService(
   compatUserRepository,
-  compatTokenService
+  compatTokenService,
 );
 
 export async function registerUser(
   name: string,
   email: string,
-  password: string
+  password: string,
 ) {
   return defaultAuthService.register(name, email, password);
 }

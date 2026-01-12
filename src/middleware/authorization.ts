@@ -16,7 +16,7 @@ export const authorize = (requiredPermission: PermissionAction) => {
       const role = await checkDocumentPermission(
         userId,
         documentId,
-        requiredPermission as string
+        requiredPermission as string,
       );
 
       req.userRole = role as DocumentRole;

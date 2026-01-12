@@ -34,7 +34,7 @@ export function notificationHandler(socket: Socket) {
     } catch (error) {
       console.error(
         `Error marking notification ${notificationId} read:`,
-        error
+        error,
       );
     }
   });

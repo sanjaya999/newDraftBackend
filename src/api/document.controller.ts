@@ -18,7 +18,10 @@ export class DocumentController {
     const userId = req.user?.id;
     const { title, docType } = req.body;
 
-    const result = await this.documentService.create(userId, { title, docType });
+    const result = await this.documentService.create(userId, {
+      title,
+      docType,
+    });
     return sendResponse(res, StatusCodes.CREATED, {
       data: result.data,
       message: "Document Created",
@@ -54,7 +57,7 @@ export class DocumentController {
       documentId,
       userId,
       email,
-      role
+      role,
     );
 
     return sendResponse(res, StatusCodes.OK, {
@@ -78,7 +81,8 @@ export class DocumentController {
 
   getAllCollaboration = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const result = await this.documentService.getAllCollaborationDocuments(userId);
+    const result =
+      await this.documentService.getAllCollaborationDocuments(userId);
     return sendResponse(res, StatusCodes.OK, {
       data: result.data,
       message: "Document fetched success",
@@ -103,12 +107,15 @@ export const createDocumentController = asyncHandler(
     const userId = req.user?.id;
     const { title, docType } = req.body;
 
-    const result = await docRepository.createDocument(userId, { title, docType });
+    const result = await docRepository.createDocument(userId, {
+      title,
+      docType,
+    });
     return sendResponse(res, StatusCodes.CREATED, {
       data: result,
       message: "Document Created",
     });
-  }
+  },
 );
 
 export const getAllDocumentController = asyncHandler(
@@ -119,7 +126,7 @@ export const getAllDocumentController = asyncHandler(
       data: result.document,
       message: "Document fetched success",
     });
-  }
+  },
 );
 
 export const getDocumentController = asyncHandler(
@@ -132,7 +139,7 @@ export const getDocumentController = asyncHandler(
       data: result.document,
       message: "Document fetched success",
     });
-  }
+  },
 );
 
 export const addCollaboratorController = asyncHandler(
@@ -141,13 +148,18 @@ export const addCollaboratorController = asyncHandler(
     const documentId = req.params.docID!;
     const { email, role } = req.body;
 
-    const result = await docService.addCollaborator(documentId, userId, email, role);
+    const result = await docService.addCollaborator(
+      documentId,
+      userId,
+      email,
+      role,
+    );
 
     return sendResponse(res, StatusCodes.OK, {
       data: result,
       message: "Collaborator added successfully",
     });
-  }
+  },
 );
 
 export const updateDocumentController = asyncHandler(
@@ -156,13 +168,16 @@ export const updateDocumentController = asyncHandler(
     const documentId = req.params.docID!;
     const { title, content } = req.body;
 
-    const result = await docService.updateDocumentService({ title }, documentId);
+    const result = await docService.updateDocumentService(
+      { title },
+      documentId,
+    );
 
     return sendResponse(res, StatusCodes.OK, {
       data: result.document,
       message: result.message,
     });
-  }
+  },
 );
 
 export const getAllCollaborationDocumentController = asyncHandler(
@@ -173,7 +188,7 @@ export const getAllCollaborationDocumentController = asyncHandler(
       data: result.documents,
       message: "Document fetched success",
     });
-  }
+  },
 );
 
 export const getAllCollaborators = asyncHandler(
@@ -185,5 +200,5 @@ export const getAllCollaborators = asyncHandler(
       data: result.collaborators,
       message: "Collaborators fetched success",
     });
-  }
+  },
 );

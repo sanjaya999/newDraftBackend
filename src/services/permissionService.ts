@@ -7,7 +7,7 @@ import { PERMISSIONS, type PermissionAction } from "../types/permissions.js";
 /**
  * PermissionService handles document permission business logic.
  * Implements IPermissionService interface for dependency injection.
- * 
+ *
  * Follows Single Responsibility Principle: only handles permission checks.
  * Follows Dependency Inversion Principle: depends on abstractions.
  */
@@ -17,7 +17,7 @@ export class PermissionService implements IPermissionService {
   async checkDocumentPermission(
     userId: string,
     documentId: string,
-    requiredPermission: string
+    requiredPermission: string,
   ): Promise<string> {
     const document = await this.prisma.document.findUnique({
       where: { id: documentId },
@@ -60,11 +60,11 @@ const defaultPermissionService = new PermissionService(prisma);
 export const checkDocumentPermission = async (
   userId: string,
   documentId: string,
-  requiredPermission: string
+  requiredPermission: string,
 ) => {
   return defaultPermissionService.checkDocumentPermission(
     userId,
     documentId,
-    requiredPermission
+    requiredPermission,
   );
 };
