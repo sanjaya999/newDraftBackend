@@ -27,7 +27,10 @@ export async function onCustomDocumentSync(
   socket: Socket,
   docID: string,
   update: Uint8Array,
-) {}
+) {
+  // TODO: Implement custom CRDT sync logic when needed
+  logger.debug(`Custom document sync called for ${docID} - not yet implemented`);
+}
 
 function onCustomDocumentAwareness(socket: Socket, docID: string, update: any) {
   socket.to(docID).emit("cdocument:awareness", {
@@ -91,7 +94,11 @@ export function registerCrdtHandlers(socket: Socket) {
       if (Selection) {
         onCustomDocumentAwareness(socket, docID, Selection);
       }
-    } catch (error: any) {}
+    } catch (error: any) {
+      logger.warn(
+        `User ${userId} denied awareness access to custom doc ${docID}: ${error.message}`,
+      );
+    }
   });
   socket.on("cdocument:leave", (docID: string) => {
     socket.leave(docID);

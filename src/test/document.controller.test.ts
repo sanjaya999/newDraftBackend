@@ -18,6 +18,7 @@ vi.mock("../repository/document.repository.js", () => ({
 }));
 
 vi.mock("../services/docs.js", () => ({
+  createNewDocument: vi.fn(),
   addCollaborator: vi.fn(),
   getDocumentById: vi.fn(),
   updateDocumentService: vi.fn(),
@@ -47,18 +48,21 @@ describe("Document Controller", () => {
     it("should create a document", async () => {
       const mockDoc = { id: "doc-1", title: "New Doc", ownerId: "user-123" };
       req.body = { title: "New Doc", docType: "text" };
-      (docRepository.createDocument as any).mockResolvedValue(mockDoc);
+      (docService.createNewDocument as any).mockResolvedValue({
+        document: mockDoc,
+        message: "Document created successfully",
+      });
 
       await createDocumentController(req, res, () => {});
 
-      expect(docRepository.createDocument).toHaveBeenCalledWith("user-123", {
+      expect(docService.createNewDocument).toHaveBeenCalledWith("user-123", {
         title: "New Doc",
         docType: "text",
       });
       expect(res.status).toHaveBeenCalledWith(StatusCodes.CREATED);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: "Document Created",
+        message: "Document created successfully",
         data: mockDoc,
       });
     });

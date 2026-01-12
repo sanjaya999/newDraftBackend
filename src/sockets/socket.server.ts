@@ -5,6 +5,7 @@ import { socketAuth } from "../middleware/authenticate.js";
 import { registerDocumentHandlers } from "../services/socket.doc.js";
 import { registerCrdtHandlers } from "../services/socket.crdt.js";
 import { notificationHandler } from "../services/notificationHandler.js";
+import { logger } from "../infrastructure/logger.js";
 
 const documents = new Map<string, DocumentData>();
 export const userSocketMap = new Map<string, string>();
@@ -24,7 +25,9 @@ export function initCollabServer(httpServer: any): Server {
       //         callback(new Error("Not allowed by cors"));
       //     }
       // },
-      origin: "*",
+      origin: env.NODE_ENV === "production" 
+        ? JSON.parse(env.CORS_ORIGIN) 
+        : "*",
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
     },
@@ -50,7 +53,7 @@ function setupSocketHandlers(io: Server) {
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.user?.id;
     const name = socket.data.user?.name;
-    console.log("user connected", userId, name);
+    logger.info(`User connected: ${userId} (${name})`);
     if (userId) {
       userSocketMap.set(userId, socket.id);
       socket.on("disconnect", () => {
