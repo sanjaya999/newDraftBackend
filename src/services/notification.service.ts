@@ -2,6 +2,7 @@ import type {
   INotificationService,
   INotificationRepository,
 } from "../interfaces/index.js";
+import { getIO, userSocketMap } from "../sockets/socket.server.js";
 
 /**
  * NotificationService handles notification business logic.
@@ -21,12 +22,18 @@ export class NotificationService implements INotificationService {
     documentId: string,
     actorId: string,
   ): Promise<void> {
-    await this.notificationRepository.create(
+    const notification = await this.notificationRepository.create(
       recipientId,
       message,
       documentId,
       actorId,
     );
+
+    // Real-time notification
+    const socketId = userSocketMap.get(recipientId);
+    if (socketId && notification) {
+      getIO().to(socketId).emit("notification:new", notification);
+    }
   }
 }
 

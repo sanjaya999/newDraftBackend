@@ -52,8 +52,6 @@ app.get("/", (req, res) => {
 
 logger.info(`Environment: ${env.NODE_ENV}`);
 
-app.use(globalErrorHandler);
-
 const startServer = async () => {
   try {
     await prisma.$connect();
@@ -67,6 +65,8 @@ const startServer = async () => {
     app.use("/auth", createAuthRouter());
     app.use("/docs", createDocumentRouter());
     app.use("/notifications", createNotificationRouter());
+    // Register global error handler AFTER routes
+    app.use(globalErrorHandler);
     logger.info("Routes registered with DI controllers.");
 
     const io = initCollabServer(httpServer);

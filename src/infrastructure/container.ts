@@ -186,7 +186,11 @@ export function bootstrapContainer(prismaClient: PrismaClient = prisma): void {
 
   container.registerSingleton(
     DEPS.NOTIFICATION_CONTROLLER,
-    () => new NotificationController(container.get(DEPS.PRISMA)),
+    () =>
+      new NotificationController(
+        container.get(DEPS.NOTIFICATION_SERVICE),
+        container.get(DEPS.NOTIFICATION_REPOSITORY),
+      ),
   );
 }
 

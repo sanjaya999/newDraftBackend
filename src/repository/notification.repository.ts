@@ -14,14 +14,22 @@ export class NotificationRepository implements INotificationRepository {
     documentId: string,
     actorId: string,
     type: string = "DOCUMENT_SHARED",
-  ): Promise<void> {
-    await this.prisma.notification.create({
+  ) {
+    return this.prisma.notification.create({
       data: {
         recipientId,
         message,
         documentId,
         actorId,
         type: type as any,
+      },
+      include: {
+        actor: {
+          select: { id: true, name: true, email: true },
+        },
+        document: {
+          select: { id: true, title: true },
+        },
       },
     });
   }

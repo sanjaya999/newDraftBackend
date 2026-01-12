@@ -94,7 +94,7 @@ export interface INotificationRepository {
     documentId: string,
     actorId: string,
     type?: string,
-  ): Promise<void>;
+  ): Promise<any>;
   findUnreadByRecipient(recipientId: string, limit: number): Promise<unknown[]>;
   markAsRead(notificationId: string, recipientId: string): Promise<void>;
 }
