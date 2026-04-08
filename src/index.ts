@@ -61,7 +61,7 @@ const startServer = async () => {
     const io = initCollabServer(httpServer);
     logger.info("socket.io server initilized");
 
-    httpServer.listen(env.PORT, () => {
+    httpServer.listen(env.PORT,'0.0.0.0', () => {
       logger.info(`Server is running on http://localhost:${env.PORT}`);
       logger.info(`socket ready`);
     });
